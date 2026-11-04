@@ -1,0 +1,11 @@
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/qjs.dir
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/qjs-libc.dir
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/qjsc.dir
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/qjs_exe.dir
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/run-test262.dir
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/api-test.dir
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/lre-test.dir
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/unicode_gen.dir
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/function_source.dir
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/edit_cache.dir
+/data/temp-mess/code/5D/.qjs-build/armeabi-v7a/CMakeFiles/rebuild_cache.dir

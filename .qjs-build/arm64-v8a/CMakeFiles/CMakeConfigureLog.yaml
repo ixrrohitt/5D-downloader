@@ -1,0 +1,919 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineSystem.cmake:228 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      The target system is: Android - 1 - aarch64
+      The host system is: Linux - 7.0.0-42-generic - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang 
+      Build flags: -g;-DANDROID;-fdata-sections;-ffunction-sections;-funwind-tables;-fstack-protector-strong;-no-canonical-prefixes;-D_FORTIFY_SOURCE=2;-Wformat;-Werror=format-security
+      Id flags: -c;--target=aarch64-none-linux-android29 
+      
+      The output was:
+      0
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.o"
+      
+      The C compiler identification is Clang, found in:
+        /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/3.28.3/CompilerIdC/CMakeCCompilerId.o
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_9df59/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_9df59.dir/build.make CMakeFiles/cmTC_9df59.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT'
+        Building C object CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot   -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat   -fPIE   -v -MD -MT CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c
+        Android (12470979, +pgo, +bolt, +lto, +mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+        Target: aarch64-none-linux-android29
+        Thread model: posix
+        InstalledDir: /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin
+         (in-process)
+         "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" -cc1 -triple aarch64-none-linux-android29 -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=non-leaf -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu generic -target-feature +neon -target-feature +v8a -target-feature +fix-cortex-a53-835769 -target-abi aapcs -debug-info-kind=constructor -dwarf-version=4 -debugger-tuning=gdb -fdebug-compilation-dir=/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT -v -ffunction-sections -fdata-sections -fcoverage-compilation-dir=/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT -resource-dir /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18 -dependency-file CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o -sys-header-deps -D ANDROID -D _FORTIFY_SOURCE=2 -isysroot /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -internal-isystem /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/include -internal-isystem /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include -internal-externc-isystem /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android -internal-externc-isystem /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/include -internal-externc-isystem /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include -Wformat -ferror-limit 19 -stack-protector 2 -fno-signed-char -fgnuc-version=4.2.1 -target-feature +outline-atomics -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o -x c /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c
+        clang -cc1 version 18.0.3 based upon LLVM 18.0.3 default target x86_64-unknown-linux-gnu
+        ignoring nonexistent directory "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include"
+        ignoring nonexistent directory "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/include
+         /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android
+         /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include
+        End of search list.
+        Linking C executable cmTC_9df59
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9df59.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments   -v CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o -o cmTC_9df59 
+        Android (12470979, +pgo, +bolt, +lto, +mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+        Target: aarch64-none-linux-android29
+        Thread model: posix
+        InstalledDir: /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin
+         "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld" --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -EL --fix-cortex-a53-843419 -z now -z relro -z max-page-size=4096 --hash-style=gnu --eh-frame-hdr -m aarch64linux -pie -dynamic-linker /system/bin/linker64 -o cmTC_9df59 /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtbegin_dynamic.o -L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/aarch64 -L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29 -L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android -L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib --build-id=sha1 --no-rosegment --no-undefined-version --fatal-warnings --no-undefined CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-aarch64-android.a -l:libunwind.a -ldl -lc /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-aarch64-android.a -l:libunwind.a -ldl /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtend_android.o
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:127 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/include]
+          add: [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android]
+          add: [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include]
+        end of search list found
+        collapse include dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/include] ==> [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/include]
+        collapse include dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android] ==> [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android]
+        collapse include dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include] ==> [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include]
+        implicit include dirs: [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/include;/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android;/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:159 (message)"
+      - "/usr/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld\\.lld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        ignore line: [Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT']
+        ignore line: []
+        ignore line: [Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_9df59/fast]
+        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_9df59.dir/build.make CMakeFiles/cmTC_9df59.dir/build]
+        ignore line: [gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT']
+        ignore line: [Building C object CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o]
+        ignore line: [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot   -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat   -fPIE   -v -MD -MT CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o -c /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c]
+        ignore line: [Android (12470979  +pgo  +bolt  +lto  +mlgo  based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)]
+        ignore line: [Target: aarch64-none-linux-android29]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin]
+        ignore line: [ (in-process)]
+        ignore line: [ "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" -cc1 -triple aarch64-none-linux-android29 -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=non-leaf -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu generic -target-feature +neon -target-feature +v8a -target-feature +fix-cortex-a53-835769 -target-abi aapcs -debug-info-kind=constructor -dwarf-version=4 -debugger-tuning=gdb -fdebug-compilation-dir=/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT -v -ffunction-sections -fdata-sections -fcoverage-compilation-dir=/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9zt5oT -resource-dir /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18 -dependency-file CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o -sys-header-deps -D ANDROID -D _FORTIFY_SOURCE=2 -isysroot /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -internal-isystem /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/include -internal-isystem /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include -internal-externc-isystem /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android -internal-externc-isystem /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/include -internal-externc-isystem /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include -Wformat -ferror-limit 19 -stack-protector 2 -fno-signed-char -fgnuc-version=4.2.1 -target-feature +outline-atomics -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o -x c /usr/share/cmake-3.28/Modules/CMakeCCompilerABI.c]
+        ignore line: [clang -cc1 version 18.0.3 based upon LLVM 18.0.3 default target x86_64-unknown-linux-gnu]
+        ignore line: [ignoring nonexistent directory "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include"]
+        ignore line: [ignoring nonexistent directory "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/include]
+        ignore line: [ /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/aarch64-linux-android]
+        ignore line: [ /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include]
+        ignore line: [End of search list.]
+        ignore line: [Linking C executable cmTC_9df59]
+        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9df59.dir/link.txt --verbose=1]
+        ignore line: [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat   -static-libstdc++ -Wl --build-id=sha1 -Wl --no-rosegment -Wl --no-undefined-version -Wl --fatal-warnings -Wl --no-undefined -Qunused-arguments   -v CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o -o cmTC_9df59 ]
+        ignore line: [Android (12470979  +pgo  +bolt  +lto  +mlgo  based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)]
+        ignore line: [Target: aarch64-none-linux-android29]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin]
+        link line: [ "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld" --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -EL --fix-cortex-a53-843419 -z now -z relro -z max-page-size=4096 --hash-style=gnu --eh-frame-hdr -m aarch64linux -pie -dynamic-linker /system/bin/linker64 -o cmTC_9df59 /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtbegin_dynamic.o -L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/aarch64 -L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29 -L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android -L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib --build-id=sha1 --no-rosegment --no-undefined-version --fatal-warnings --no-undefined CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-aarch64-android.a -l:libunwind.a -ldl -lc /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-aarch64-android.a -l:libunwind.a -ldl /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtend_android.o]
+          arg [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/ld.lld] ==> ignore
+          arg [--sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot] ==> ignore
+          arg [-EL] ==> ignore
+          arg [--fix-cortex-a53-843419] ==> ignore
+          arg [-znow] ==> ignore
+          arg [-zrelro] ==> ignore
+          arg [-zmax-page-size=4096] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [-m] ==> ignore
+          arg [aarch64linux] ==> ignore
+          arg [-pie] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/system/bin/linker64] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_9df59] ==> ignore
+          arg [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtbegin_dynamic.o] ==> obj [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtbegin_dynamic.o]
+          arg [-L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/aarch64] ==> dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/aarch64]
+          arg [-L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29] ==> dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29]
+          arg [-L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android] ==> dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android]
+          arg [-L/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib] ==> dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib]
+          arg [--build-id=sha1] ==> ignore
+          arg [--no-rosegment] ==> ignore
+          arg [--no-undefined-version] ==> ignore
+          arg [--fatal-warnings] ==> ignore
+          arg [--no-undefined] ==> ignore
+          arg [CMakeFiles/cmTC_9df59.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-aarch64-android.a] ==> lib [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-aarch64-android.a]
+          arg [-l:libunwind.a] ==> lib [-l:libunwind.a]
+          arg [-ldl] ==> lib [dl]
+          arg [-lc] ==> lib [c]
+          arg [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-aarch64-android.a] ==> lib [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-aarch64-android.a]
+          arg [-l:libunwind.a] ==> lib [-l:libunwind.a]
+          arg [-ldl] ==> lib [dl]
+          arg [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtend_android.o] ==> obj [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtend_android.o]
+        remove lib [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-aarch64-android.a]
+        remove lib [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-aarch64-android.a]
+        collapse library dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/aarch64] ==> [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/aarch64]
+        collapse library dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29] ==> [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29]
+        collapse library dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android] ==> [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android]
+        collapse library dir [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib] ==> [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib]
+        implicit libs: [-l:libunwind.a;dl;c;-l:libunwind.a;dl]
+        implicit objs: [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtbegin_dynamic.o;/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtend_android.o]
+        implicit dirs: [/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/lib/clang/18/lib/linux/aarch64;/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29;/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android;/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:92 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wall"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-b61RVG"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-b61RVG"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wall"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-b61RVG'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_9ac40/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_9ac40.dir/build.make CMakeFiles/cmTC_9ac40.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-b61RVG'
+        Building C object CMakeFiles/cmTC_9ac40.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wall  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wall -MD -MT CMakeFiles/cmTC_9ac40.dir/src.c.o -MF CMakeFiles/cmTC_9ac40.dir/src.c.o.d -o CMakeFiles/cmTC_9ac40.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-b61RVG/src.c
+        Linking C executable cmTC_9ac40
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9ac40.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_9ac40.dir/src.c.o -o cmTC_9ac40  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-b61RVG'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:97 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wextra"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hNHHpA"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hNHHpA"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wextra"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hNHHpA'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_f1507/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_f1507.dir/build.make CMakeFiles/cmTC_f1507.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hNHHpA'
+        Building C object CMakeFiles/cmTC_f1507.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wextra  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wextra -MD -MT CMakeFiles/cmTC_f1507.dir/src.c.o -MF CMakeFiles/cmTC_f1507.dir/src.c.o.d -o CMakeFiles/cmTC_f1507.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hNHHpA/src.c
+        Linking C executable cmTC_f1507
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f1507.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_f1507.dir/src.c.o -o cmTC_f1507  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hNHHpA'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:99 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wformat=2"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-X38TwF"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-X38TwF"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wformat=2"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-X38TwF'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_6ddac/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_6ddac.dir/build.make CMakeFiles/cmTC_6ddac.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-X38TwF'
+        Building C object CMakeFiles/cmTC_6ddac.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wformat=2  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wformat=2 -MD -MT CMakeFiles/cmTC_6ddac.dir/src.c.o -MF CMakeFiles/cmTC_6ddac.dir/src.c.o.d -o CMakeFiles/cmTC_6ddac.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-X38TwF/src.c
+        Linking C executable cmTC_6ddac
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6ddac.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_6ddac.dir/src.c.o -o cmTC_6ddac  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-X38TwF'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:100 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wnoimplicitfallthrough"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-5cLrxg"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-5cLrxg"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wnoimplicitfallthrough"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-5cLrxg'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_797dd/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_797dd.dir/build.make CMakeFiles/cmTC_797dd.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-5cLrxg'
+        Building C object CMakeFiles/cmTC_797dd.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wnoimplicitfallthrough  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wno-implicit-fallthrough -MD -MT CMakeFiles/cmTC_797dd.dir/src.c.o -MF CMakeFiles/cmTC_797dd.dir/src.c.o.d -o CMakeFiles/cmTC_797dd.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-5cLrxg/src.c
+        Linking C executable cmTC_797dd
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_797dd.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_797dd.dir/src.c.o -o cmTC_797dd  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-5cLrxg'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:101 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wnosigncompare"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-Lhw9pY"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-Lhw9pY"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wnosigncompare"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-Lhw9pY'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_6e06d/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_6e06d.dir/build.make CMakeFiles/cmTC_6e06d.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-Lhw9pY'
+        Building C object CMakeFiles/cmTC_6e06d.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wnosigncompare  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wno-sign-compare -MD -MT CMakeFiles/cmTC_6e06d.dir/src.c.o -MF CMakeFiles/cmTC_6e06d.dir/src.c.o.d -o CMakeFiles/cmTC_6e06d.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-Lhw9pY/src.c
+        Linking C executable cmTC_6e06d
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6e06d.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_6e06d.dir/src.c.o -o cmTC_6e06d  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-Lhw9pY'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:102 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wnomissingfieldinitializers"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-qBR8WJ"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-qBR8WJ"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wnomissingfieldinitializers"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-qBR8WJ'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_15316/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_15316.dir/build.make CMakeFiles/cmTC_15316.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-qBR8WJ'
+        Building C object CMakeFiles/cmTC_15316.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wnomissingfieldinitializers  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wno-missing-field-initializers -MD -MT CMakeFiles/cmTC_15316.dir/src.c.o -MF CMakeFiles/cmTC_15316.dir/src.c.o.d -o CMakeFiles/cmTC_15316.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-qBR8WJ/src.c
+        Linking C executable cmTC_15316
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_15316.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_15316.dir/src.c.o -o cmTC_15316  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-qBR8WJ'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:103 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wnounusedparameter"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-4egEJb"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-4egEJb"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wnounusedparameter"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-4egEJb'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_11340/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_11340.dir/build.make CMakeFiles/cmTC_11340.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-4egEJb'
+        Building C object CMakeFiles/cmTC_11340.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wnounusedparameter  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wno-unused-parameter -MD -MT CMakeFiles/cmTC_11340.dir/src.c.o -MF CMakeFiles/cmTC_11340.dir/src.c.o.d -o CMakeFiles/cmTC_11340.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-4egEJb/src.c
+        Linking C executable cmTC_11340
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_11340.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_11340.dir/src.c.o -o cmTC_11340  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-4egEJb'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:104 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wnounusedbutsetvariable"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-XKi1mS"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-XKi1mS"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wnounusedbutsetvariable"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-XKi1mS'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_12237/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_12237.dir/build.make CMakeFiles/cmTC_12237.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-XKi1mS'
+        Building C object CMakeFiles/cmTC_12237.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wnounusedbutsetvariable  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wno-unused-but-set-variable -MD -MT CMakeFiles/cmTC_12237.dir/src.c.o -MF CMakeFiles/cmTC_12237.dir/src.c.o.d -o CMakeFiles/cmTC_12237.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-XKi1mS/src.c
+        Linking C executable cmTC_12237
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_12237.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_12237.dir/src.c.o -o cmTC_12237  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-XKi1mS'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:105 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wnounusedresult"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-WTTuJO"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-WTTuJO"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wnounusedresult"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-WTTuJO'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_a9eab/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_a9eab.dir/build.make CMakeFiles/cmTC_a9eab.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-WTTuJO'
+        Building C object CMakeFiles/cmTC_a9eab.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wnounusedresult  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wno-unused-result -MD -MT CMakeFiles/cmTC_a9eab.dir/src.c.o -MF CMakeFiles/cmTC_a9eab.dir/src.c.o.d -o CMakeFiles/cmTC_a9eab.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-WTTuJO/src.c
+        Linking C executable cmTC_a9eab
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a9eab.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_a9eab.dir/src.c.o -o cmTC_a9eab  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-WTTuJO'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:106 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wnostringoptruncation"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-wXD5KZ"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-wXD5KZ"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wnostringoptruncation"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-wXD5KZ'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_0786f/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_0786f.dir/build.make CMakeFiles/cmTC_0786f.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-wXD5KZ'
+        Building C object CMakeFiles/cmTC_0786f.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wnostringoptruncation  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wno-stringop-truncation -MD -MT CMakeFiles/cmTC_0786f.dir/src.c.o -MF CMakeFiles/cmTC_0786f.dir/src.c.o.d -o CMakeFiles/cmTC_0786f.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-wXD5KZ/src.c
+        warning: unknown warning option '-Wno-stringop-truncation'; did you mean '-Wno-format-truncation'? [-Wunknown-warning-option]
+        1 warning generated.
+        Linking C executable cmTC_0786f
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0786f.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_0786f.dir/src.c.o -o cmTC_0786f  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-wXD5KZ'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:107 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_Wnoarraybounds"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9JUvAR"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9JUvAR"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_Wnoarraybounds"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9JUvAR'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_c9b05/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_c9b05.dir/build.make CMakeFiles/cmTC_c9b05.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9JUvAR'
+        Building C object CMakeFiles/cmTC_c9b05.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_Wnoarraybounds  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -Wno-array-bounds -MD -MT CMakeFiles/cmTC_c9b05.dir/src.c.o -MF CMakeFiles/cmTC_c9b05.dir/src.c.o.d -o CMakeFiles/cmTC_c9b05.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9JUvAR/src.c
+        Linking C executable cmTC_c9b05
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c9b05.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_c9b05.dir/src.c.o -o cmTC_c9b05  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-9JUvAR'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "CMakeLists.txt:86 (check_c_compiler_flag)"
+      - "CMakeLists.txt:109 (xcheck_add_c_compiler_flag)"
+    checks:
+      - "Performing Test COMPILER_SUPPORTS_funsignedchar"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hAdFFP"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hAdFFP"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "COMPILER_SUPPORTS_funsignedchar"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hAdFFP'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_c7547/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_c7547.dir/build.make CMakeFiles/cmTC_c7547.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hAdFFP'
+        Building C object CMakeFiles/cmTC_c7547.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCOMPILER_SUPPORTS_funsignedchar  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE   -funsigned-char -MD -MT CMakeFiles/cmTC_c7547.dir/src.c.o -MF CMakeFiles/cmTC_c7547.dir/src.c.o.d -o CMakeFiles/cmTC_c7547.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hAdFFP/src.c
+        Linking C executable cmTC_c7547
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c7547.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_c7547.dir/src.c.o -o cmTC_c7547  -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-hAdFFP'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:97 (CHECK_C_SOURCE_COMPILES)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "CMakeLists.txt:300 (find_package)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-RlmfIL"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-RlmfIL"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-RlmfIL'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_7b3a9/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_7b3a9.dir/build.make CMakeFiles/cmTC_7b3a9.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-RlmfIL'
+        Building C object CMakeFiles/cmTC_7b3a9.dir/src.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCMAKE_HAVE_LIBC_PTHREAD  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE -MD -MT CMakeFiles/cmTC_7b3a9.dir/src.c.o -MF CMakeFiles/cmTC_7b3a9.dir/src.c.o.d -o CMakeFiles/cmTC_7b3a9.dir/src.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-RlmfIL/src.c
+        /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-RlmfIL/src.c:13:3: error: call to undeclared function 'pthread_cancel'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+           13 |   pthread_cancel(thread);
+              |   ^
+        /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-RlmfIL/src.c:13:3: note: did you mean 'pthread_once'?
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/pthread.h:264:5: note: 'pthread_once' declared here
+          264 | int pthread_once(pthread_once_t* _Nonnull __once, void (* _Nonnull __init_routine)(void));
+              |     ^
+        1 error generated.
+        gmake[1]: *** [CMakeFiles/cmTC_7b3a9.dir/build.make:79: CMakeFiles/cmTC_7b3a9.dir/src.c.o] Error 1
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-RlmfIL'
+        gmake: *** [Makefile:127: cmTC_7b3a9/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:112 (CHECK_LIBRARY_EXISTS)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:175 (_threads_check_lib)"
+      - "CMakeLists.txt:300 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthreads"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-lUehbj"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-lUehbj"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREADS_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-lUehbj'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_36881/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_36881.dir/build.make CMakeFiles/cmTC_36881.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-lUehbj'
+        Building C object CMakeFiles/cmTC_36881.dir/CheckFunctionExists.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot   -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -DCHECK_FUNCTION_EXISTS=pthread_create -std=gnu11 -fPIE -MD -MT CMakeFiles/cmTC_36881.dir/CheckFunctionExists.c.o -MF CMakeFiles/cmTC_36881.dir/CheckFunctionExists.c.o.d -o CMakeFiles/cmTC_36881.dir/CheckFunctionExists.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-lUehbj/CheckFunctionExists.c
+        Linking C executable cmTC_36881
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_36881.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -DCHECK_FUNCTION_EXISTS=pthread_create -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_36881.dir/CheckFunctionExists.c.o -o cmTC_36881  -lpthreads -latomic -lm 
+        ld.lld: error: unable to find library -lpthreads
+        clang: error: linker command failed with exit code 1 (use -v to see invocation)
+        gmake[1]: *** [CMakeFiles/cmTC_36881.dir/build.make:100: cmTC_36881] Error 1
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-lUehbj'
+        gmake: *** [Makefile:127: cmTC_36881/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:112 (CHECK_LIBRARY_EXISTS)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:176 (_threads_check_lib)"
+      - "CMakeLists.txt:300 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthread"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-HrjV3a"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-HrjV3a"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREAD_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-HrjV3a'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_86417/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_86417.dir/build.make CMakeFiles/cmTC_86417.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-HrjV3a'
+        Building C object CMakeFiles/cmTC_86417.dir/CheckFunctionExists.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot   -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -DCHECK_FUNCTION_EXISTS=pthread_create -std=gnu11 -fPIE -MD -MT CMakeFiles/cmTC_86417.dir/CheckFunctionExists.c.o -MF CMakeFiles/cmTC_86417.dir/CheckFunctionExists.c.o.d -o CMakeFiles/cmTC_86417.dir/CheckFunctionExists.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-HrjV3a/CheckFunctionExists.c
+        Linking C executable cmTC_86417
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_86417.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -DCHECK_FUNCTION_EXISTS=pthread_create -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_86417.dir/CheckFunctionExists.c.o -o cmTC_86417  -lpthread -latomic -lm 
+        ld.lld: error: unable to find library -lpthread
+        clang: error: linker command failed with exit code 1 (use -v to see invocation)
+        gmake[1]: *** [CMakeFiles/cmTC_86417.dir/build.make:100: cmTC_86417] Error 1
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-HrjV3a'
+        gmake: *** [Makefile:127: cmTC_86417/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:136 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:179 (_threads_check_flag_pthread)"
+      - "CMakeLists.txt:300 (find_package)"
+    checks:
+      - "Check if compiler accepts -pthread"
+    directories:
+      source: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-fUP9Ys"
+      binary: "/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-fUP9Ys"
+    cmakeVariables:
+      ANDROID_ABI: "arm64-v8a"
+      ANDROID_ARM_MODE: "thumb"
+      ANDROID_PIE: "TRUE"
+      ANDROID_PLATFORM: "android-29"
+      ANDROID_STL: "c++_static"
+      ANDROID_TOOLCHAIN: "clang"
+      CMAKE_CXX_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_COMPILER_TARGET: "aarch64-none-linux-android29"
+      CMAKE_C_FLAGS: "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security "
+      CMAKE_C_FLAGS_DEBUG: "-fno-limit-debug-info "
+      CMAKE_EXE_LINKER_FLAGS: "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  "
+      CMAKE_POSITION_INDEPENDENT_CODE: "TRUE"
+      CMAKE_SYSROOT: "/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+    buildResult:
+      variable: "THREADS_HAVE_PTHREAD_ARG"
+      cached: true
+      stdout: |
+        Change Dir: '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-fUP9Ys'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_d89fb/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_d89fb.dir/build.make CMakeFiles/cmTC_d89fb.dir/build
+        gmake[1]: Entering directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-fUP9Ys'
+        Building C object CMakeFiles/cmTC_d89fb.dir/CheckForPthreads.c.o
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot   -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -std=gnu11 -fPIE -MD -MT CMakeFiles/cmTC_d89fb.dir/CheckForPthreads.c.o -MF CMakeFiles/cmTC_d89fb.dir/CheckForPthreads.c.o.d -o CMakeFiles/cmTC_d89fb.dir/CheckForPthreads.c.o -c /data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-fUP9Ys/CheckForPthreads.c
+        Linking C executable cmTC_d89fb
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d89fb.dir/link.txt --verbose=1
+        /home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments    CMakeFiles/cmTC_d89fb.dir/CheckForPthreads.c.o -o cmTC_d89fb  -pthread -latomic -lm 
+        gmake[1]: Leaving directory '/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/CMakeScratch/TryCompile-fUP9Ys'
+        
+      exitCode: 0
+...

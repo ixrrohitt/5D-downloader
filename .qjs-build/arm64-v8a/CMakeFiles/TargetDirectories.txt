@@ -1,0 +1,11 @@
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/qjs.dir
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/qjs-libc.dir
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/qjsc.dir
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/qjs_exe.dir
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/run-test262.dir
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/api-test.dir
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/lre-test.dir
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/unicode_gen.dir
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/function_source.dir
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/edit_cache.dir
+/data/temp-mess/code/5D/.qjs-build/arm64-v8a/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,2 @@
+/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar qc libqjs-libc.a "CMakeFiles/qjs-libc.dir/quickjs-libc.c.o"
+/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib libqjs-libc.a

@@ -1,0 +1,3 @@
+yt-dlp[default]
+yt-dlp-ejs
+imageio-ffmpeg

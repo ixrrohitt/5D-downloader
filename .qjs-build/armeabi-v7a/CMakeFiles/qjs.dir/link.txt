@@ -1,0 +1,2 @@
+/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar qc libqjs.a CMakeFiles/qjs.dir/dtoa.c.o CMakeFiles/qjs.dir/libregexp.c.o CMakeFiles/qjs.dir/libunicode.c.o CMakeFiles/qjs.dir/quickjs.c.o
+/home/ixrrohitt/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib libqjs.a
