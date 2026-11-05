@@ -129,8 +129,11 @@ class MainActivity : Activity() {
     inner class Bridge {
         @JavascriptInterface fun startProbe(text: String, cookies: String): String = Engine.startProbe(text, cookies)
         @JavascriptInterface fun startDownload(json: String): String = Engine.startDownload(json)
+        @JavascriptInterface fun startStream(json: String): String = Engine.startStream(json)
         @JavascriptInterface fun getJob(id: String): String = Engine.getJob(id)
         @JavascriptInterface fun cancel(id: String) = Engine.cancel(id)
+        @JavascriptInterface fun pause(id: String) = Engine.pause(id)
+        @JavascriptInterface fun resume(id: String) = Engine.resume(id)
         @JavascriptInterface fun listFiles(): String = Engine.listSaved()
         @JavascriptInterface fun deleteFile(uri: String) = Engine.deleteSaved(uri)
         @JavascriptInterface fun saveCookies(text: String): String = Engine.saveCookies(text)

@@ -1,6 +1,8 @@
 {
-  "version": 2,
-  "apk_version": 2,
-  "files": ["index.html"],
-  "notes": "First release: runs fully on your phone, share YouTube links into the app, saves to Downloads/5D-Downloader."
+  "version": 3,
+  "apk_version": 3,
+  "files": [
+    "index.html"
+  ],
+  "notes": "Multi-connection downloads, pause/resume, watch without downloading, audio quality choice, universal link fetch, full Spotify playlists."
 }

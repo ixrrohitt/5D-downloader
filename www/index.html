@@ -77,7 +77,7 @@ pre{font:11px/1.65 ui-monospace,monospace;color:#8fe;white-space:pre-wrap;margin
  <button class="ib" id="bV" aria-label="vault">⌂</button><button class="ib" id="bC" aria-label="cookies">◍</button><button class="ib" id="bL" aria-label="log">≡</button><button class="ib appOnly" id="bU" aria-label="update">⟳</button><button class="ib" id="bS" aria-label="sound">♪</button></div>
 
 <section class="step on" id="s-paste"><div class="big" data-big>PASTE</div>
- <div class="field"><input id="url" placeholder="paste a youtube link…" autocomplete="off" spellcheck="false"><button class="orb mag" id="goF" aria-label="go">→</button></div>
+ <div class="field"><input id="url" placeholder="paste any link: video, photo, reel, post, song…" autocomplete="off" spellcheck="false"><button class="orb mag" id="goF" aria-label="go">→</button></div>
  <p class="hint">playlists · many links · drag &amp; drop</p><div class="err" id="fErr"></div></section>
 <section class="step" id="s-fetch"><div class="big" data-big>READ</div><p class="hint" id="fS">connecting</p><button class="lnk" id="cancelF">✕ cancel</button></section>
 <section class="step" id="s-choose"><div class="big" data-big>PICK</div><h2 class="t2" id="cT"></h2><p class="hint" id="cM"></p>
@@ -87,8 +87,8 @@ pre{font:11px/1.65 ui-monospace,monospace;color:#8fe;white-space:pre-wrap;margin
   <button class="tile" data-v="audio"><svg viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4.5" height="6.5" rx="2"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="2"/></svg><b>Audio</b><small id="tA">MP3</small></button></div>
  <div class="chips" id="chips"></div>
  <div class="usage" id="usage"></div>
- <button class="launch mag" id="goD"><span class="lt"><b>Download</b><small id="lsz">—</small></span><i class="la">→</i></button><button class="lnk" id="back">← new link</button></section>
-<section class="step" id="s-prog"><div id="pnum" data-big>0%</div><h2 class="t2" id="pT">Downloading</h2><p class="hint" id="pS"></p><p class="hint small" id="pF"></p><button class="pill cancel mag" id="cancel">✕ CANCEL</button></section>
+ <button class="launch mag" id="goD"><span class="lt"><b>Download</b><small id="lsz">—</small></span><i class="la">→</i></button><button class="lnk" id="watch">▶ Watch without downloading</button><button class="lnk" id="back">← new link</button></section>
+<section class="step" id="s-prog"><div id="pnum" data-big>0%</div><h2 class="t2" id="pT">Downloading</h2><p class="hint" id="pS"></p><p class="hint small" id="pF"></p><button class="pill mag" id="pause">⏸ PAUSE</button><button class="pill mag" id="bgGo" style="display:none">⏸ keep paused · new link</button><button class="pill cancel mag" id="cancel">✕ CANCEL</button></section>
 <section class="step" id="s-done"><div class="big" data-big>DONE</div><div class="dl" id="links"></div><button class="pill mag" id="again">+ ANOTHER</button></section>
 
 <div class="shade" id="shade"></div>
@@ -112,18 +112,22 @@ function entry(i,url){const d=i.duration,th=i.thumbnail||(i.thumbnails&&i.thumbn
  if(!Object.keys(sizes).length&&d){sizes={};for(const h in EST)sizes[h]=Math.round(d*EST[h]);est=true}
  return{title:i.title||url||"(untitled)",url:i.webpage_url||url,duration:d,thumbnail:th,sizes,est,audio:d?Math.round(d*24000):null}}
 const cache={};
-function buildProbe(j){if(cache[j.id])return cache[j.id];const raws=j.raw||[],videos=[];let title="video",hs=null;
+function buildProbe(j){if(cache[j.id])return cache[j.id];const raws=j.raw||[],videos=[];let title="video",hs=null,ab=0;
+ for(const r of raws){try{const o=JSON.parse(r);for(const f of(o.formats||[]))if(f.acodec&&f.acodec!=="none"&&f.abr>ab)ab=f.abr}catch(_){}}
  if(j.mode==="multiple"){raws.forEach((r,i)=>{let e;try{e=entry(JSON.parse(r),j.urls[i])}catch(_){e={title:j.urls[i],url:j.urls[i],duration:null,thumbnail:null,sizes:{},est:false,audio:null}}videos.push(e)});title=videos.length+" videos";const s=new Set();videos.forEach(v=>Object.keys(v.sizes).forEach(h=>s.add(+h)));hs=[...s].sort((a,b)=>a-b)}
  else{const info=JSON.parse(raws[0]);title=info.title||"video";
   if(j.mode==="playlist"||info.entries){for(const e of(info.entries||[]).slice(0,200)){if(!e)continue;let u=e.url||e.webpage_url||"";if(u&&!u.startsWith("http"))u="https://www.youtube.com/watch?v="+u;videos.push(entry(e,u))}}
   else{videos.push(entry(info,j.urls[0]));hs=[...new Set((info.formats||[]).filter(f=>f.height&&f.vcodec!=="none").map(f=>f.height))].sort((a,b)=>a-b)}}
- return cache[j.id]={title,is_playlist:j.mode==="playlist",videos,resolutions:hs&&hs.length?hs:[144,240,360,480,720,1080],mode:j.mode,urls:j.urls}}
+ return cache[j.id]={title,is_playlist:j.mode==="playlist",videos,resolutions:hs&&hs.length?hs:(j.mode==="playlist"?[144,240,360,480,720,1080]:[]),mode:j.mode,urls:j.urls,abr:Math.round(ab)}}
 /* /api/* → on-device engine (same contract as the PC server, so the UI is identical) */
 window.fetch=async(url,o={})=>{const u=typeof url==="string"?url:url.url;if(!u.startsWith("/api/"))return realFetch(url,o);const m=(o.method||"GET").toUpperCase(),b=o.body;
  try{
   if(u==="/api/probe"&&m==="POST"){const d=JSON.parse(b);return J({job_id:A.startProbe(d.url||"",d.cookies_file||"")})}
   if(u.startsWith("/api/job/")){const s=A.getJob(u.split("/").pop());if(!s)return J({error:"unknown job"},404);const j=JSON.parse(s);if(j.kind==="probe"&&j.status==="probe_done")j.probe=buildProbe(j);delete j.raw;return J(j)}
+  if(u==="/api/stream"&&m==="POST")return J({job_id:A.startStream(b)});
   if(u==="/api/download"&&m==="POST")return J({job_id:A.startDownload(b)});
+  if(u==="/api/pause"&&m==="POST"){A.pause(JSON.parse(b).job_id);return J({ok:true})}
+  if(u==="/api/resume"&&m==="POST"){A.resume(JSON.parse(b).job_id);return J({ok:true})}
   if(u==="/api/cancel"&&m==="POST"){A.cancel(JSON.parse(b).job_id);return J({ok:true})}
   if(u==="/api/files"&&m==="GET")return J({files:JSON.parse(A.listFiles())});
   if(u==="/api/files"&&m==="DELETE"){A.deleteFile(JSON.parse(b).path);return J({ok:true,files:JSON.parse(A.listFiles())})}
@@ -241,13 +245,23 @@ function logs(l=[]){if($("#sh-L").classList.contains("on"))$("#log").textContent
 const selIdx=()=>$$("#cards .cd").map((c,i)=>c.classList.contains("sel")?i:-1).filter(i=>i>=0);
 const selTxt=()=>{if(S.probe){$("#cM").textContent=(S.probe.videos.length===1?"1 video":selIdx().length+" of "+S.probe.videos.length+" selected")+" · tap cards to toggle";updateSizes()}};
 function rng(ix){const n=ix.map(i=>i+1).sort((a,b)=>a-b),o=[];let s=n[0],p=n[0];for(let i=1;i<n.length;i++){if(n[i]===p+1){p=n[i];continue}o.push(s===p?""+s:s+"-"+p);s=p=n[i]}o.push(s===p?""+s:s+"-"+p);return o.join(",")}
-function setMedia(v){S.media=v;$$("#tiles .tile").forEach(b=>b.classList.toggle("on",b.dataset.v===v));$("#chips").style.display=v==="audio"?"none":"";updateSizes()}
+function setMedia(v){S.media=v;$$("#tiles .tile").forEach(b=>b.classList.toggle("on",b.dataset.v===v));$("#chips").style.display=v==="audio"?"none":"";if($("#vfmt")){$("#vfmt").style.display=v==="audio"?"none":"";$("#afmt").style.display=v==="audio"?"":"none"}updAq(v==="audio");updateSizes()}
 $("#tiles").onclick=e=>{const b=e.target.closest("[data-v]");if(b){setMedia(b.dataset.v);tone(b.dataset.v==="audio"?700:500,.3)}};
 function showProbe(j){$("#cT").textContent=j.title;
  $("#cards").innerHTML=j.videos.map((v,i)=>`<div class="cd sel ${i<12?"a":""}" style="--i:${i}">${v.thumbnail?`<img loading="lazy" decoding="async" src="${esc(v.thumbnail)}" onerror="this.outerHTML='<div class=th></div>'">`:'<div class="th"></div>'}<b>${esc(v.title)}</b></div>`).join("");
  $$("#cards .cd").forEach(c=>c.onclick=()=>{c.classList.toggle("sel");selTxt();tone(c.classList.contains("sel")?740:420,.2)});selTxt();
  const rs=(j.resolutions||[]).filter(r=>r<=4320).sort((a,b)=>a-b);S.res=rs.includes(720)?720:0;
- $("#chips").innerHTML=[0,...rs].map(r=>`<span class="ch ${r===S.res?"on":""}" data-r="${r}"><b>${r?r+"p":"Best"}</b><small>—</small></span>`).join("");setMedia("video");go("choose")}
+ $("#chips").innerHTML=[0,...rs].map(r=>`<span class="ch ${r===S.res?"on":""}" data-r="${r}"><b>${r?r+"p":"Best"}</b><small>—</small></span>`).join("");
+ if(!$("#vfmt")){$("#chips").insertAdjacentHTML("afterend",'<div class="chips" id="vfmt"></div><div class="chips" id="afmt"></div>')}
+ S.vf=S.vf||"mp4";S.af=S.af||"mp3";
+ $("#vfmt").innerHTML=[["mp4","mp4"],["mkv","mkv"],["webm","webm"],["best","original"]].map(([k,l])=>`<span class="ch ${k===S.vf?"on":""}" data-vf="${k}"><b>${l}</b></span>`).join("");
+ $("#afmt").innerHTML=[["mp3","mp3"],["m4a","m4a"],["opus","opus"],["ogg","ogg"],["flac","flac"],["wav","wav"],["best","original"]].map(([k,l])=>`<span class="ch ${k===S.af?"on":""}" data-af="${k}"><b>${l}</b></span>`).join("");
+ if(!$("#aqual"))$("#afmt").insertAdjacentHTML("afterend",'<div class="chips" id="aqual"></div>');
+ S.aq="0";{const mx=j.abr||160,lad=[320,256,192,160,128,96].filter(k=>k<mx-1&&k>=96).slice(0,3);
+  $("#aqual").innerHTML=[["0","best"+(j.abr?" ≈"+j.abr+"k":"")],...lad.map(k=>[""+k,k+"k"])].map(([k,l])=>`<span class="ch ${k===S.aq?"on":""}" data-aq="${k}"><b>${l}</b></span>`).join("")}
+ setMedia("video");go("choose")}
+function updAq(aud){const e=$("#aqual");if(e)e.style.display=(aud&&["mp3","m4a","opus","ogg","aac"].includes(S.af))?"":"none"}
+document.addEventListener("click",e=>{const q=e.target.closest("[data-aq]");if(q){S.aq=q.dataset.aq;$$("#aqual .ch").forEach(x=>x.classList.toggle("on",x===q));tone(600,.2)}const v=e.target.closest("[data-vf]"),a=e.target.closest("[data-af]");if(v){S.vf=v.dataset.vf;$$("#vfmt .ch").forEach(x=>x.classList.toggle("on",x===v));tone(600,.2)}if(a){S.af=a.dataset.af;$$("#afmt .ch").forEach(x=>x.classList.toggle("on",x===a));tone(600,.2);updAq(S.media==="audio");updateSizes()}});
 $("#chips").onclick=e=>{const c=e.target.closest("[data-r]");if(!c)return;S.res=+c.dataset.r;$$("#chips .ch").forEach(x=>x.classList.toggle("on",x===c));updateSizes();tone(600,.2)};
 function fail(msg,back){logOff();S.busy=false;try{localStorage.removeItem("ytdl_job")}catch(_){}$("#fErr").textContent=msg;toast(msg.slice(0,60));phase("error");go(back);setTimeout(()=>phase("idle"),50)}
 function phaseOf(j,cur){const s=j.stage||"";if(j.status==="done")return"done";if(j.status==="error")return"error";if(/Merg/i.test(s))return"merge";if(/Extract|Convert|Audio/i.test(s))return"convert";if(/ZIP/i.test(s))return"zip";if(j.status==="fetching")return"fetch";if(/^Downloading/i.test(s))return"download";return cur}
@@ -277,10 +291,58 @@ document.addEventListener("dragover",e=>e.preventDefault());
 document.addEventListener("drop",e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&/\.txt$/i.test(f.name))return upCookie(f);if(S.step==="paste")feed(e.dataTransfer.getData("text/uri-list")||e.dataTransfer.getData("text/plain"))});
 function reset(){tok++;logOff();S.probe=null;S.busy=false;S.target=0;S.disp=0;$("#url").value="";$("#fErr").textContent="";phase("idle");document.title="3·4·5D downloader";go("paste")}
 $("#back").onclick=reset;$("#again").onclick=reset;
+
+/* ---- pause / resume (paused downloads keep their partial files; another link can be started meanwhile) ---- */
+S.bg=S.bg||[];
+function bgRender(){let e=$("#bgList");if(!e){const f=$("#fErr");if(!f)return;f.insertAdjacentHTML("afterend",'<div id="bgList"></div>');e=$("#bgList")}
+ e.innerHTML=S.bg.map(x=>`<div class="li" style="display:flex;gap:8px;align-items:center;margin:8px 0"><div class="n" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">⏸ ${esc(x.title)}</div><button class="lnk" data-bgr="${x.id}">▶ resume</button><button class="lnk" data-bgc="${x.id}">✕</button></div>`).join("")}
+$("#pause").onclick=async()=>{if(!S.job)return;const b=$("#pause");
+ try{if(!S.paused){await api("/api/pause",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({job_id:S.job})});S.paused=true;b.textContent="▶ RESUME";$("#pT").textContent="Paused";$("#bgGo").style.display=""}
+  else{await api("/api/resume",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({job_id:S.job})});S.paused=false;b.textContent="⏸ PAUSE";$("#pT").textContent="Downloading";$("#bgGo").style.display="none"}}
+ catch(e){toast(e.message)}};
+$("#bgGo").onclick=()=>{if(!S.job||!S.paused)return;S.bg.push({id:S.job,title:(S.probe&&S.probe.title)||"download"});tok++;S.paused=false;S.job=null;$("#pause").textContent="⏸ PAUSE";$("#bgGo").style.display="none";try{localStorage.removeItem("ytdl_job")}catch(_){}reset();bgRender()};
+document.addEventListener("click",async e=>{const r=e.target.closest("[data-bgr]"),c=e.target.closest("[data-bgc]");
+ if(r&&!S.busy){const id=r.dataset.bgr,it=S.bg.find(x=>x.id===id);S.bg=S.bg.filter(x=>x.id!==id);
+  try{await api("/api/resume",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({job_id:id})})}catch(er){toast(er.message)}
+  S.busy=true;S.job=id;S.paused=false;S.disp=0;S.target=1;$("#pT").textContent="Downloading";$("#pause").textContent="⏸ PAUSE";$("#bgGo").style.display="none";phase("download");go("prog");bgRender();poll(id,"dl")}
+ else if(r)toast("finish or pause the current download first");
+ if(c){const id=c.dataset.bgc;S.bg=S.bg.filter(x=>x.id!==id);try{await api("/api/cancel",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({job_id:id})})}catch(_){}bgRender()}});
+/* ---- watch / listen without saving ---- */
+if(!window.Android){const w=$("#watch");if(w)w.style.display="none"}
+let plTimer=null;
+function closePlayer(){clearInterval(plTimer);plTimer=null;const o=$("#plr");if(o){o.querySelectorAll("video,audio").forEach(x=>{try{x.pause();x.removeAttribute("src");x.load()}catch(_){}});o.remove()}}
+function syncAV(v,a){const sy=()=>{if(Math.abs(a.currentTime-v.currentTime)>.35)a.currentTime=v.currentTime};
+ v.addEventListener("play",()=>{a.currentTime=v.currentTime;a.play().catch(()=>{})});
+ v.addEventListener("playing",()=>{sy();a.play().catch(()=>{})});
+ v.addEventListener("pause",()=>a.pause());
+ v.addEventListener("waiting",()=>a.pause());
+ v.addEventListener("seeking",()=>{a.currentTime=v.currentTime});
+ v.addEventListener("ratechange",()=>{a.playbackRate=v.playbackRate});
+ v.addEventListener("volumechange",()=>{a.volume=v.volume;a.muted=v.muted});
+ plTimer=setInterval(()=>{if(!v.paused)sy()},1000)}
+function openPlayer(r){closePlayer();const e2=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ const o=document.createElement("div");o.id="plr";o.style.cssText="position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);box-sizing:border-box";
+ let md="";
+ if(r.kind==="image")md=`<img src="${e2(r.url)}" style="max-width:100%;max-height:80vh">`;
+ else if(r.kind==="audio")md=`<audio id="plm" src="${e2(r.url)}" controls autoplay style="width:92%"></audio>`;
+ else md=`<video id="plm" src="${e2(r.url)}" controls autoplay playsinline style="width:100%;max-height:78vh;background:#000"></video>`+(r.audio_url?`<audio id="pla" src="${e2(r.audio_url)}" preload="auto"></audio>`:"");
+ o.innerHTML=`<div style="color:#ddd;font:14px system-ui;padding:10px 14px;width:100%;box-sizing:border-box;display:flex;gap:10px;align-items:center"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e2(r.title)}${r.height?" · "+r.height+"p":""}</span><button id="plx" style="font:inherit;padding:6px 12px">✕ close</button></div>`+md+(r.note?`<p style="color:#999;font:12px system-ui;padding:8px 14px;text-align:center;margin:0">${e2(r.note)}</p>`:"");
+ document.body.appendChild(o);$("#plx").onclick=closePlayer;
+ const v=$("#plm"),a=$("#pla");if(v&&a)syncAV(v,a);
+ if(v)v.onerror=()=>toast("Could not play this stream here — use Download instead")}
+$("#watch").onclick=async()=>{if(!S.probe)return;const p=S.probe,ix=selIdx();if(!ix.length){toast("pick one to watch");return}
+ const it=p.videos[ix[0]],u=it&&it.url;if(!u){toast("nothing to play");return}
+ const b=$("#watch"),t0=b.textContent;b.disabled=true;b.textContent="preparing stream…";
+ try{const{job_id}=await api("/api/stream",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:u,resolution:S.res,media_type:S.media,cookies_file:S.cookie})});
+  let j=null;for(let n=0;n<150;n++){await new Promise(r=>setTimeout(r,1000));j=await api("/api/job/"+job_id);if(j.status==="stream_done"||j.status==="error")break}
+  if(!j||j.status!=="stream_done")throw new Error((j&&j.error)||"could not prepare the stream");
+  openPlayer(j.result)}
+ catch(e){toast(e.message)}finally{b.disabled=false;b.textContent=t0}};
+
 $("#goD").onclick=async()=>{if(!S.probe||S.busy)return;const p=S.probe,ix=selIdx();if(!ix.length){toast("pick at least one");return}
  let urls,pi="";if(p.mode==="playlist"){urls=[p.urls[0]];pi=rng(ix)}else urls=ix.map(i=>p.videos[i].url).filter(Boolean);
- S.busy=true;S.disp=0;S.target=1;cancelReset();$("#pT").textContent="Downloading";phase("download");go("prog");
- try{const{job_id}=await api("/api/download",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mode:p.mode,media_type:S.media,resolution:S.res,urls,playlist_items:pi,total_items:ix.length,title:p.title,cookies_file:S.cookie})});
+ S.busy=true;S.disp=0;S.target=1;S.paused=false;$("#pause").textContent="⏸ PAUSE";$("#bgGo").style.display="none";cancelReset();$("#pT").textContent="Downloading";phase("download");go("prog");
+ try{const{job_id}=await api("/api/download",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mode:p.mode,media_type:S.media,resolution:S.res,video_format:S.vf||"mp4",audio_format:S.af||"mp3",audio_quality:S.aq||"0",urls,playlist_items:pi,total_items:ix.length,title:p.title,cookies_file:S.cookie})});
   S.job=job_id;try{localStorage.setItem("ytdl_job",job_id)}catch(_){}poll(job_id,"dl")}
  catch(e){fail(e.message,"choose")}};
 async function upCookie(f){if(!f)return;const fd=new FormData();fd.append("file",f);try{const j=await api("/api/cookies",{method:"POST",body:fd});S.cookie=j.cookies_file;toast("cookies loaded");chord([600,900]);sheet(null)}catch(e){toast(e.message)}}
@@ -295,7 +357,7 @@ function updateSizes(){if(!S.probe)return;const n=selIdx().length;
  $$("#chips .ch").forEach(c=>{const t=total(+c.dataset.r,"video");c.querySelector("small").textContent=t.sum?(t.est?"~":"")+fb(t.sum):"—"});
  const tv=total(S.res,"video"),ta=total(0,"audio"),t=S.media==="audio"?ta:tv;
  $("#tV").textContent="MP4 · "+(tv.sum?(tv.est?"~":"")+fb(tv.sum):"size n/a");$("#tA").textContent="MP3 · "+(ta.sum?"~"+fb(ta.sum):"size n/a");
- $("#usage").innerHTML=n?`<b class="grad">${t.sum?(t.est?"≈ ":"")+fb(t.sum):"size unknown"}</b>of data<span> · ${n} ${n>1?"files":"file"} · ${S.media==="video"?(S.res?S.res+"p":"best quality"):"192 kbps"}${t.unk?" · "+t.unk+" unknown":""}</span>`:"nothing selected";
+ $("#usage").innerHTML=n?`<b class="grad">${t.sum?(t.est?"≈ ":"")+fb(t.sum):"size unknown"}</b>of data<span> · ${n} ${n>1?"files":"file"} · ${S.media==="video"?(S.res?S.res+"p":"best quality"):(S.af==="best"?"original audio":(S.af||"mp3")+" best")}${t.unk?" · "+t.unk+" unknown":""}</span>`:"nothing selected";
  $("#lsz").textContent=n&&t.sum?(t.est?"≈ ":"")+fb(t.sum)+" · "+(S.media==="video"?"video":"audio"):n?"size unknown":"pick something"}
 /* ===== ambient log: low-opacity background, fades away when the process ends ===== */
 const bg=$("#bglog");let bgLast="",bgOff=0;

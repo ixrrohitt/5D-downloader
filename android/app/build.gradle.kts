@@ -24,8 +24,11 @@ android {
         applicationId = "com.ixrrohitt.fived"
         minSdk = 29
         targetSdk = 34
-        versionCode = 2          // keep in sync with "apk_version" in ../version.json
-        versionName = "1.1"
+        // versionCode comes from "apk_version" in ../version.json: bump it whenever you push a new APK,
+        // otherwise some phones refuse to install it over the old one ("package appears to be invalid").
+        val apkVer = Regex("\"apk_version\"\\s*:\\s*(\\d+)").find(rootProject.file("../version.json").readText())?.groupValues?.get(1)?.toInt() ?: 1
+        versionCode = apkVer
+        versionName = "1.$apkVer"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
     }
 
@@ -57,5 +60,6 @@ android {
 dependencies {
     implementation("io.github.junkfood02.youtubedl-android:library:0.17.2")
     implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.17.2")
+    implementation("io.github.junkfood02.youtubedl-android:aria2c:0.17.2")   // multi-connection downloads
     implementation("androidx.webkit:webkit:1.11.0")
 }

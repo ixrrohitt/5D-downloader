@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import com.yausername.aria2c.Aria2c
 import com.yausername.ffmpeg.FFmpeg
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
@@ -11,6 +12,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
+import java.util.concurrent.atomic.AtomicReference
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -32,7 +34,9 @@ class Job(val id: String, val kind: String) {
     @Volatile var total = 1
     @Volatile var error: String? = null
     @Volatile var cancel = false
+    @Volatile var paused = false
     @Volatile var message = ""
+    @Volatile var result: JSONObject? = null
     @Volatile var mode = ""
     @Volatile var urls = JSONArray()
     @Volatile var links = JSONArray()
@@ -57,6 +61,7 @@ class Job(val id: String, val kind: String) {
             .put("mode", mode).put("urls", urls).put("raw", raw).put("links", links)
             .put("log", log).put("message", message)
         error?.let { o.put("error", it) }
+        result?.let { o.put("result", it) }
         return o.toString()
     }
 }
@@ -69,6 +74,9 @@ object Engine {
     @Volatile private var ready = false
     @Volatile private var initError: String? = null
     private val FALLBACK = Regex("(?i)sign in|not a bot|challenge|format is not available|requested format|javascript|po token|only images")
+    @Volatile private var ariaReady = false
+    private val SINGLE_VIDEO = Regex("(?i)/(?:reels?|tv|watch|videos?|shorts|status|clip|v)/|[?&]v=|fb\\.watch|/share/[vr]/")
+    private val TERABOX = Regex("(?i)terabox|1024tera|4funbox|mirrobox|nephobox|momerybox|terafileshare|teraboxlink")
     private val BOT = Regex("(?i)not a bot|sign in to confirm")
     private val SPOTIFY = Regex("open\\.spotify\\.com/(?:intl-[\\w-]+/)?(track|album|playlist)/([A-Za-z0-9]+)")
     private val RX_SPEED = Regex("at\\s+([\\d.]+)\\s*([KMGT]?i?B)/s")
@@ -84,6 +92,7 @@ object Engine {
             try {
                 YoutubeDL.getInstance().init(ctx)
                 FFmpeg.init(ctx)
+                try { Aria2c.init(ctx); ariaReady = true } catch (e: Throwable) {}
                 ready = true
                 autoUpdate()
             } catch (e: Throwable) {
@@ -131,11 +140,31 @@ object Engine {
         val m = e.message ?: e.toString()
         val line = m.lines().lastOrNull { it.contains("ERROR") } ?: m.lines().firstOrNull { it.isNotBlank() } ?: m
         val msg = line.removePrefix("ERROR: ").trim()
+        if (TERABOX.containsMatchIn(msg)) return "Terabox links are not supported yet: yt-dlp has no Terabox extractor and the app has no Terabox resolver."
         if (BOT.containsMatchIn(msg)) return "YouTube wants sign-in. Tap ◍ and upload a fresh cookies.txt (exported while logged in), then tap ⟳ to update the engine and retry."
         return msg.take(300)
     }
 
     fun getJob(id: String): String = jobs[id]?.toJson() ?: ""
+
+    /** Pause = stop the yt-dlp process but keep its partial files; resume re-runs it and it continues from them. */
+    fun pause(id: String) {
+        val j = jobs[id] ?: return
+        if (j.kind != "download" || j.status == "done" || j.status == "error") return
+        j.paused = true; j.status = "paused"; j.stage = "Paused"
+        try { YoutubeDL.getInstance().destroyProcessById(id) } catch (e: Throwable) {}
+    }
+
+    fun resume(id: String) {
+        val j = jobs[id] ?: return
+        if (!j.paused) return
+        j.paused = false; j.status = "running"; j.stage = "Resuming…"
+    }
+
+    private fun waitResume(j: Job) {
+        while (j.paused && !j.cancel) Thread.sleep(300)
+        if (j.cancel) throw Cancelled()
+    }
 
     fun cancel(id: String) {
         val j = jobs[id] ?: return
@@ -206,6 +235,91 @@ object Engine {
         j.raw.put(raw)
         j.addLog("Metadata received.", "ok")
         j.stage = "Ready"; j.progress = 100; j.status = "probe_done"
+    }
+
+
+    // ------------------------------------------------------------ watch without saving
+    private class Fmt(val o: JSONObject) {
+        val url: String = o.optString("url", "")
+        val h: Int = o.optInt("height", 0)
+        val proto: String = o.optString("protocol", "https")
+        val ext: String = o.optString("ext", "")
+        private fun cod(k: String): String { val v = o.optString(k, "unknown"); return if (v == "null" || v.isEmpty()) "unknown" else v }
+        val vc = cod("vcodec"); val ac = cod("acodec")
+        val hasV get() = vc != "none"
+        val hasA get() = ac != "none"
+        val rate: Double get() = maxOf(o.optDouble("abr", 0.0), o.optDouble("tbr", 0.0))
+        val vRank: Int get() = when { vc.startsWith("avc1") || vc.startsWith("h264") -> 0; vc.startsWith("vp9") || vc.startsWith("vp09") -> 1; vc.startsWith("av01") -> 3; else -> 2 }
+        val aRank: Int get() = if (ext == "m4a" || ext == "mp4" || ac.startsWith("mp4a")) 0 else 1
+    }
+
+    fun startStream(json: String): String {
+        val d = JSONObject(json)
+        val j = newJob("stream")
+        val cookie = cookiePath(d.optString("cookies_file", ""))
+        thread {
+            try { runStream(j, d.optString("url", ""), d.optInt("resolution", 0), d.optString("media_type", "video"), cookie) }
+            catch (e: Throwable) { j.fail(clean(e)) }
+        }
+        return j.id
+    }
+
+    private fun finishStream(j: Job, out: JSONObject) {
+        j.result = out; j.stage = "Ready"; j.progress = 100; j.status = "stream_done"
+    }
+
+    /** Finds a playable stream URL for the chosen quality (no download). HD YouTube-style formats come as
+     *  separate video and audio URLs; the page plays them together and keeps them in sync. */
+    private fun runStream(j: Job, url: String, res: Int, media: String, cookie: String?) {
+        j.status = "fetching"; j.stage = "Preparing stream"; j.progress = 15
+        if (url.isBlank()) { j.fail("Nothing to play."); return }
+        if (url.startsWith("direct:")) {
+            val u = url.removePrefix("direct:"); val e = extOf(u)
+            finishStream(j, JSONObject().put("kind", if (e.isEmpty()) "video" else kindOfExt(e)).put("url", u).put("title", nameOf(u, "file")))
+            return
+        }
+        if (!awaitReady(j)) return
+        j.stage = "Finding the best stream"; j.progress = 40
+        var info = JSONObject(dump(url, "--no-playlist", cookie))
+        if (info.has("entries")) info = info.getJSONArray("entries").optJSONObject(0) ?: throw Exception("No playable result.")
+        val arr = info.optJSONArray("formats")
+        val fm = (0 until (arr?.length() ?: 0)).mapNotNull { arr!!.optJSONObject(it) }.map { Fmt(it) }.filter { it.url.startsWith("http") }
+        val prog = fm.filter { it.proto == "https" || it.proto == "http" }
+        val hls = fm.filter { it.proto.startsWith("m3u8") }
+        val bestA = prog.filter { it.hasA && !it.hasV }.sortedWith(compareByDescending<Fmt> { it.rate }.thenBy { it.aRank }).firstOrNull()
+        val out = JSONObject().put("title", str(info, "title").ifEmpty { "Preview" })
+        fun single(f: Fmt, kind: String, note: String? = null) {
+            out.put("kind", kind).put("url", f.url)
+            if (f.h > 0) out.put("height", f.h)
+            if (note != null) out.put("note", note)
+        }
+        fun byQ(l: List<Fmt>) = l.sortedWith(compareByDescending<Fmt> { it.h }.thenBy { it.vRank })
+        var ok = false
+        if (media == "audio") {
+            val a = bestA ?: prog.filter { it.hasA }.minByOrNull { it.h } ?: hls.firstOrNull { it.hasA }
+            if (a != null) { single(a, if (a.proto.startsWith("m3u8")) "hls" else "audio"); ok = true }
+        } else {
+            fun choose(cap: Int): Boolean {
+                val comb = byQ(prog.filter { it.hasV && it.hasA && it.h <= cap }).firstOrNull()
+                val vo = byQ(prog.filter { it.hasV && !it.hasA && it.h in 1..cap }).firstOrNull()
+                if (vo != null && bestA != null && (comb == null || vo.h > comb.h)) {
+                    single(vo, "video", "HD stream: video and audio load separately and are kept in sync."); out.put("audio_url", bestA.url); return true
+                }
+                if (comb != null) { single(comb, "video"); return true }
+                val hl = byQ(hls.filter { it.hasV && it.h <= cap }).firstOrNull()
+                if (hl != null) { single(hl, "hls"); return true }
+                if (vo != null) { single(vo, "video", "This stream has no audio."); return true }
+                return false
+            }
+            val minH = fm.filter { it.hasV && it.h > 0 }.minOfOrNull { it.h } ?: Int.MAX_VALUE
+            ok = choose(if (res > 0) res else Int.MAX_VALUE) || choose(minH) || choose(Int.MAX_VALUE)
+        }
+        if (!ok) {
+            val gu = info.optString("url", "")
+            if (gu.startsWith("http")) { out.put("kind", if (media == "audio") "audio" else "video").put("url", gu); ok = true }
+        }
+        if (!ok) { j.fail("No directly playable stream found for this link. Use Download instead."); return }
+        finishStream(j, out)
     }
 
     // ---------------------------------------------------------------- Spotify
@@ -388,7 +502,7 @@ object Engine {
 
     private fun startFallback(u: String): Pending {
         val p = Pending()
-        if (YT_HOST.containsMatchIn(u)) { p.items = emptyList(); return p }   // yt-dlp is the right tool for YouTube
+        if (YT_HOST.containsMatchIn(u) || TERABOX.containsMatchIn(u)) { p.items = emptyList(); return p }   // YouTube: yt-dlp is right; Terabox pages are JS-only, a scan would return junk   // yt-dlp is the right tool for YouTube
         p.t = thread { p.items = try { fallbackItems(u) } catch (_: Throwable) { emptyList() } }
         return p
     }
@@ -396,9 +510,9 @@ object Engine {
     private fun fallbackItems(u: String): List<Media> {
         try { xTweet(u)?.takeIf { it.isNotEmpty() }?.let { return it } } catch (_: Exception) {}
         try { xTweetVx(u)?.takeIf { it.isNotEmpty() }?.let { return it } } catch (_: Exception) {}
-        try { igEmbed(u)?.takeIf { it.isNotEmpty() }?.let { return it } } catch (_: Exception) {}
-        try { scrape(u, UA).takeIf { it.isNotEmpty() }?.let { return it } } catch (_: Exception) {}
-        return try { scrape(u, BOT_UA) } catch (_: Exception) { emptyList() }
+        try { igEmbed(u)?.let { validate(it) }?.takeIf { it.isNotEmpty() }?.let { return it } } catch (_: Exception) {}
+        try { validate(scrape(u, UA)).takeIf { it.isNotEmpty() }?.let { return it } } catch (_: Exception) {}
+        return try { validate(scrape(u, BOT_UA)) } catch (_: Exception) { emptyList() }
     }
 
     /** Undo JSON/HTML escaping (also double-escaped JSON inside scripts) so media URLs can be matched. */
@@ -421,8 +535,9 @@ object Engine {
                 Regex("src\\s*=\\s*[\"']([^\"']+)[\"']").find(tag.value)?.groupValues?.get(1)?.let { imgs.add(it) }
             val title = "Instagram $code"; val thumb = imgs.firstOrNull() ?: ""
             val out = ArrayList<Media>()
-            if (vids.isNotEmpty()) vids.forEachIndexed { i, v -> out.add(Media(v, "video", if (vids.size > 1) "$title (${i + 1})" else title, thumb, true)) }
-            else imgs.forEachIndexed { i, v -> out.add(Media(v, "image", if (imgs.size > 1) "$title (${i + 1})" else title, v, true)) }
+            val vl = dedupe(vids.toList()).let { if (SINGLE_VIDEO.containsMatchIn(u)) it.take(1) else it.take(10) }
+            if (vl.isNotEmpty()) vl.forEachIndexed { i, v -> out.add(Media(v, "video", if (vl.size > 1) "$title (${i + 1})" else title, thumb, true)) }
+            else dedupe(imgs.toList()).take(20).forEachIndexed { i, v -> out.add(Media(v, "image", if (imgs.size > 1) "$title (${i + 1})" else title, v, true)) }
             return out
         } finally { c.disconnect() }
     }
@@ -499,71 +614,169 @@ object Engine {
                     "og:title", "twitter:title" -> if (title.isEmpty()) title = v
                 }
             }
+            // primary video sources first: structured keys (HD first) and <video>/<source> tags
+            val hd = Regex("\"(?:playable_url_quality_hd|browser_native_hd_url|hd_src)\"\\s*:\\s*\"(https?://[^\"]+)\"").findAll(html).map { it.groupValues[1] }.toList()
+            for (m in KEY_VIDEO.findAll(html)) vids.add(m.groupValues[1])
+            for (m in Regex("<(?:video|source)\\s[^>]*?src\\s*=\\s*[\"']([^\"']+)[\"']", RegexOption.IGNORE_CASE).findAll(html))
+                abs(m.groupValues[1])?.let { if (extOf(it) in VIDEO_EXTS) vids.add(it) }
+            if (hd.isNotEmpty()) { val o = LinkedHashSet<String>(hd); o.addAll(vids); vids.clear(); vids.addAll(o) }
+            // blind URL scan only when nothing structured was found
             val extraImgs = LinkedHashSet<String>()
-            for (m in MEDIA_URL.findAll(html)) {
+            if (vids.isEmpty() && pages.isEmpty()) for (m in MEDIA_URL.findAll(html)) {
                 val x = m.value; val e = extOf(x)
                 when {
-                    e in VIDEO_EXTS -> vids.add(x)
-                    e in AUDIO_EXTS -> auds.add(x)
+                    e in VIDEO_EXTS -> if (vids.size < 3) vids.add(x)
+                    e in AUDIO_EXTS -> if (auds.size < 5) auds.add(x)
                     e in IMAGE_EXTS && !JUNK_IMG.containsMatchIn(x) -> extraImgs.add(x)
                 }
             }
-            for (m in KEY_VIDEO.findAll(html)) vids.add(m.groupValues[1])
-            for (m in KEY_IMAGE.findAll(html)) if (!JUNK_IMG.containsMatchIn(m.groupValues[1])) extraImgs.add(m.groupValues[1])
-            if (imgs.isEmpty() && vids.isEmpty()) imgs.addAll(extraImgs.take(30))
+            if (imgs.isEmpty() && vids.isEmpty() && pages.isEmpty() && auds.isEmpty()) imgs.addAll(extraImgs.take(12))
             if (title.isEmpty()) title = Regex("<title[^>]*>(.*?)</title>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
                 .find(html)?.groupValues?.get(1)?.trim()?.replace(Regex("\\s+"), " ")?.take(100) ?: ""
             val thumb = imgs.firstOrNull() ?: ""
-            val out = ArrayList<Media>()
-            fun nm(url: String, kind: String, i: Int) = (title.ifEmpty { nameOf(url, kind) }) + if (vids.size + auds.size + imgs.size > 1) " (${i + 1})" else ""
-            var n = 0
-            for (x in vids.take(20)) out.add(Media(x, "video", nm(x, "video", n++), thumb, true))
-            for (x in pages.take(5)) out.add(Media(x, "video", nm(x, "video", n++), thumb, false))   // let yt-dlp try embed pages
-            for (x in auds.take(20)) out.add(Media(x, "audio", nm(x, "audio", n++), thumb, true))
-            for (x in imgs.take(30)) out.add(Media(x, "image", nm(x, "image", n++), x, true))
+            val single = SINGLE_VIDEO.containsMatchIn(u)
+            val vl = dedupe(vids.toList()).let { if (single) it.take(1) else it.take(10) }
+            val hasVideo = vl.isNotEmpty() || pages.isNotEmpty()
+            val il = if (hasVideo) emptyList() else dedupe(imgs.toList()).take(20)    // images are only thumbnails when a video exists
+            val al = if (hasVideo) emptyList() else dedupe(auds.toList()).take(10)
+            val count = vl.size + pages.size.coerceAtMost(3) + al.size + il.size
+            fun nm(url: String, kind: String, i: Int) = (title.ifEmpty { nameOf(url, kind) }) + if (count > 1) " (${i + 1})" else ""
+            val out = ArrayList<Media>(); var n = 0
+            for (x in vl) out.add(Media(x, "video", nm(x, "video", n++), thumb, true))
+            for (x in pages.take(3)) out.add(Media(x, "video", nm(x, "video", n++), thumb, false))
+            for (x in al) out.add(Media(x, "audio", nm(x, "audio", n++), thumb, true))
+            for (x in il) out.add(Media(x, "image", nm(x, "image", n++), x, true))
             return out
         } finally { c.disconnect() }
     }
 
-    /** Plain HTTP download for items that yt-dlp cannot handle (images, direct media files). */
-    private fun directDownload(j: Job, url: String, work: File) {
-        val c = openUrl(url)
-        try {
-            val ct = (c.contentType ?: "").substringBefore(';').trim().lowercase()
-            val total = c.contentLengthLong
-            var name = nameOf(url, ct.substringBefore('/').ifEmpty { "file" })
-            if (extOf("http://x/$name").isEmpty()) {
-                val ext = when (ct) {
-                    "image/jpeg" -> "jpg"; "image/png" -> "png"; "image/webp" -> "webp"; "image/gif" -> "gif"; "image/avif" -> "avif"
-                    "video/mp4" -> "mp4"; "video/webm" -> "webm"; "audio/mpeg" -> "mp3"; "audio/mp4" -> "m4a"
-                    "audio/ogg" -> "ogg"; "audio/wav", "audio/x-wav" -> "wav"; "audio/flac" -> "flac"
-                    else -> ct.substringAfter('/', "bin").ifEmpty { "bin" }
-                }
-                name += ".$ext"
+    private fun dedupe(l: List<String>): List<String> { val seen = HashSet<String>(); return l.filter { seen.add(it.substringBefore('?')) } }
+
+    /** Keeps only candidates that really answer as a media file of the right type and a sane size (drops icons, GIF junk, dead links). */
+    private fun validate(items: List<Media>): List<Media> {
+        if (items.isEmpty()) return items
+        val ok = java.util.concurrent.ConcurrentHashMap<String, Boolean>()
+        val ts = items.filter { it.direct }.map { m ->
+            thread {
+                try {
+                    val c = openUrl(m.url); c.setRequestProperty("Range", "bytes=0-0"); c.connectTimeout = 8000; c.readTimeout = 8000
+                    try {
+                        val code = c.responseCode
+                        val ct = (c.contentType ?: "").substringBefore(';').trim().lowercase()
+                        val size = if (code == 206) c.getHeaderField("Content-Range")?.substringAfter('/')?.toLongOrNull() ?: -1L else c.contentLengthLong
+                        val bin = ct.endsWith("octet-stream")
+                        val good = code in 200..299 && when (m.kind) {
+                            "image" -> ct.startsWith("image/") && (size < 0 || size >= 20_000)
+                            "audio" -> ct.startsWith("audio/") || bin
+                            else -> (ct.startsWith("video/") || bin) && (size < 0 || size >= 30_000)
+                        }
+                        ok[m.url] = good
+                    } finally { c.disconnect() }
+                } catch (_: Exception) { ok[m.url] = false }
             }
-            var f = File(work, name); var n = 1
-            while (f.exists()) f = File(work, name.substringBeforeLast('.') + " (${n++})." + name.substringAfterLast('.'))
-            j.currentFile = f.name; j.stage = "Downloading"; j.currentPct = 0.0
-            var done = 0L; val t0 = System.currentTimeMillis(); var tick = 0L
-            c.inputStream.use { ins ->
-                f.outputStream().use { out ->
-                    val buf = ByteArray(64 * 1024)
-                    while (true) {
-                        if (j.cancel) throw Cancelled()
-                        val r = ins.read(buf); if (r < 0) break
-                        out.write(buf, 0, r); done += r
-                        val now = System.currentTimeMillis()
-                        if (now - tick > 400) {
-                            tick = now
-                            if (total > 0) j.currentPct = done * 100.0 / total
-                            j.speed = done * 1000.0 / (now - t0 + 1)
+        }
+        ts.forEach { it.join(12000) }
+        return items.filter { !it.direct || ok[it.url] == true }
+    }
+
+    /** Plain HTTP download (images, direct media files): up to 8 parallel connections when the server supports ranges,
+     *  with pause/resume (connections stay idle while paused and reconnect from where they stopped). */
+    private fun directDownload(j: Job, url: String, work: File) {
+        var code = 0; var ct = ""; var total = -1L
+        val probe = openUrl(url); probe.setRequestProperty("Range", "bytes=0-0")
+        try {
+            code = probe.responseCode
+            ct = (probe.contentType ?: "").substringBefore(';').trim().lowercase()
+            total = if (code == 206) probe.getHeaderField("Content-Range")?.substringAfter('/')?.toLongOrNull() ?: -1L else probe.contentLengthLong
+        } finally { probe.disconnect() }
+        if (code >= 400) throw Exception("Server answered HTTP $code for this file")
+        var name = nameOf(url, ct.substringBefore('/').ifEmpty { "file" })
+        if (extOf("http://x/$name").isEmpty()) {
+            val ext = when (ct) {
+                "image/jpeg" -> "jpg"; "image/png" -> "png"; "image/webp" -> "webp"; "image/gif" -> "gif"; "image/avif" -> "avif"
+                "video/mp4" -> "mp4"; "video/webm" -> "webm"; "audio/mpeg" -> "mp3"; "audio/mp4" -> "m4a"
+                "audio/ogg" -> "ogg"; "audio/wav", "audio/x-wav" -> "wav"; "audio/flac" -> "flac"
+                else -> ct.substringAfter('/', "bin").ifEmpty { "bin" }
+            }
+            name += ".$ext"
+        }
+        var f = File(work, name); var n = 1
+        while (f.exists()) f = File(work, name.substringBeforeLast('.') + " (${n++})." + name.substringAfterLast('.'))
+        j.currentFile = f.name; j.stage = "Downloading"; j.currentPct = 0.0
+        val t0 = System.currentTimeMillis()
+        if (code == 206 && total > 2_000_000) {
+            val parts = 8
+            val seg = total / parts
+            val doneArr = java.util.concurrent.atomic.AtomicLongArray(parts)
+            val err = AtomicReference<Throwable?>(null)
+            val pool = java.util.concurrent.Executors.newFixedThreadPool(parts)
+            java.io.RandomAccessFile(f, "rw").use { raf ->
+                raf.setLength(total)
+                val ch = raf.channel
+                val futures = (0 until parts).map { p ->
+                    val start = p * seg; val end = if (p == parts - 1) total - 1 else start + seg - 1
+                    pool.submit(Runnable {
+                        try {
+                            var pos = start; var tries = 0
+                            while (pos <= end && err.get() == null && !j.cancel) {
+                                while (j.paused && !j.cancel) Thread.sleep(250)
+                                try {
+                                    val cc = openUrl(url); cc.setRequestProperty("Range", "bytes=$pos-$end")
+                                    try {
+                                        if (cc.responseCode != 206) throw Exception("Server ignored the range request (${cc.responseCode})")
+                                        cc.inputStream.use { ins ->
+                                            val buf = ByteArray(64 * 1024)
+                                            while (pos <= end && !j.cancel) {
+                                                while (j.paused && !j.cancel) Thread.sleep(250)
+                                                val r = ins.read(buf); if (r < 0) break
+                                                val w = minOf(r.toLong(), end - pos + 1).toInt()
+                                                ch.write(java.nio.ByteBuffer.wrap(buf, 0, w), pos)
+                                                pos += w; doneArr.set(p, pos - start)
+                                            }
+                                        }
+                                    } finally { cc.disconnect() }
+                                    tries = 0
+                                } catch (e: Exception) { if (++tries > 6) throw e; Thread.sleep(700L * tries) }
+                            }
+                        } catch (e: Throwable) { err.compareAndSet(null, e) }
+                    })
+                }
+                try {
+                    while (!futures.all { it.isDone }) {
+                        if (j.cancel) { pool.shutdownNow(); throw Cancelled() }
+                        var sum = 0L; for (i in 0 until parts) sum += doneArr.get(i)
+                        j.currentPct = sum * 100.0 / total
+                        j.speed = if (j.paused) 0.0 else sum * 1000.0 / (System.currentTimeMillis() - t0 + 1)
+                        Thread.sleep(300)
+                    }
+                } finally { pool.shutdown() }
+            }
+            err.get()?.let { throw if (it is Exception) it else Exception(it.message) }
+        } else {
+            val c = openUrl(url)
+            try {
+                var done = 0L; var tick = 0L
+                c.inputStream.use { ins ->
+                    f.outputStream().use { out ->
+                        val buf = ByteArray(64 * 1024)
+                        while (true) {
+                            if (j.cancel) throw Cancelled()
+                            while (j.paused && !j.cancel) Thread.sleep(250)
+                            val r = ins.read(buf); if (r < 0) break
+                            out.write(buf, 0, r); done += r
+                            val now = System.currentTimeMillis()
+                            if (now - tick > 400) {
+                                tick = now
+                                if (total > 0) j.currentPct = done * 100.0 / total
+                                j.speed = done * 1000.0 / (now - t0 + 1)
+                            }
                         }
                     }
                 }
-            }
-            j.currentPct = 100.0
-            j.addLog("Downloaded ${f.name}", "ok")
-        } finally { c.disconnect() }
+            } finally { c.disconnect() }
+        }
+        j.currentPct = 100.0
+        j.addLog("Downloaded ${f.name}", "ok")
     }
 
     // --------------------------------------------------------------- download
@@ -633,6 +846,7 @@ object Engine {
         val h = if (res > 0) "[height<=$res]" else ""
         val af = d.optString("audio_format", "mp3").lowercase().let { if (it == "ogg") "vorbis" else it }
             .takeIf { it in setOf("mp3", "m4a", "opus", "vorbis", "wav", "flac", "aac", "best") } ?: "mp3"
+        val aq = d.optString("audio_quality", "0").takeIf { it.matches(Regex("\\d{1,3}")) } ?: "0"
         val vf = d.optString("video_format", "mp4").lowercase().takeIf { it in setOf("mp4", "mkv", "webm", "best") } ?: "mp4"
         val fmt = if (media == "audio") "bestaudio/best" else when (vf) {
             "webm" -> "bv*[ext=webm]$h+ba[ext=webm]/bv*$h+ba/b$h/b"
@@ -642,7 +856,9 @@ object Engine {
         val playlist = j.mode == "playlist"
         j.addLog("Mode: ${j.mode} · $media · format: $fmt")
 
-        fun req(u: String, extra: List<String>): YoutubeDLRequest {
+        val cb: (Float, Long, String) -> Unit = { p, eta, line -> onLine(j, p, eta, line) }
+        var ariaOn = ariaReady
+        fun req(u: String, extra: List<String>, aria: Boolean = ariaOn): YoutubeDLRequest {
             val r = YoutubeDLRequest(u)
             r.addOption("-f", fmt)
             val tpl = if (u.startsWith("ytsearch")) {   // name Spotify tracks "Artist - Title"
@@ -651,33 +867,57 @@ object Engine {
                 "$nm.%(ext)s"
             } else "%(title).120B.%(ext)s"
             r.addOption("-o", work.absolutePath + "/" + tpl)
-            if (media == "audio") { r.addOption("-x"); r.addOption("--audio-format", af); r.addOption("--audio-quality", "0") }
+            if (media == "audio") { r.addOption("-x"); r.addOption("--audio-format", af); r.addOption("--audio-quality", if (aq == "0") "0" else aq + "K") }
             else r.addOption("--merge-output-format", if (vf == "best") "mkv" else vf)
             if (playlist) {
                 val items = d.optString("playlist_items", "").trim()
                 if (items.isNotEmpty()) r.addOption("--playlist-items", items)
             } else r.addOption("--no-playlist")
             r.addOption("--newline"); r.addOption("--no-mtime")
+            r.addOption("-N", "8")      // parallel fragments (HLS/DASH)
+            if (aria) {                 // multi-connection downloads for normal files
+                r.addOption("--downloader", "libaria2c.so")
+                r.addOption("--downloader-args", "aria2c:-x 16 -s 16 -k 1M --file-allocation=none")
+            }
             if (cookie != null) r.addOption("--cookies", cookie)
             r.addCommands(commonArgs()); r.addCommands(jsArgs())
             if (extra.isNotEmpty()) r.addCommands(extra)
             return r
         }
 
-        val cb: (Float, Long, String) -> Unit = { p, eta, line -> onLine(j, p, eta, line) }
+        fun runYt(u: String) {
+            fun attempt(extra: List<String>) {
+                try { YoutubeDL.getInstance().execute(req(u, extra), j.id, cb) }
+                catch (e: Exception) {
+                    if (j.cancel || j.paused) throw e
+                    if (ariaOn && !FALLBACK.containsMatchIn(e.message ?: "")) {
+                        ariaOn = false; j.addLog("Fast downloader failed; retrying with the standard one…", "warn")
+                        YoutubeDL.getInstance().execute(req(u, extra), j.id, cb)
+                    } else throw e
+                }
+            }
+            try { attempt(emptyList()) }
+            catch (e: YoutubeDL.CanceledException) { throw e }
+            catch (e: Exception) {
+                if (j.cancel || j.paused) throw e
+                if (FALLBACK.containsMatchIn(e.message ?: "")) {
+                    j.addLog("Retrying with an alternate YouTube client…", "warn")
+                    attempt(fallbackArgs(cookie))
+                } else throw e
+            }
+        }
+
         for ((i, u) in urls.withIndex()) {
             if (j.cancel) throw Cancelled()
             if (!playlist) j.completed = i
             if (u.startsWith("direct:")) { directDownload(j, u.removePrefix("direct:"), work); continue }
-            try {
-                YoutubeDL.getInstance().execute(req(u, emptyList()), j.id, cb)
-            } catch (e: YoutubeDL.CanceledException) { throw e }
-            catch (e: Exception) {
-                if (j.cancel) throw Cancelled()
-                if (FALLBACK.containsMatchIn(e.message ?: "")) {
-                    j.addLog("Retrying with an alternate YouTube client…", "warn")
-                    YoutubeDL.getInstance().execute(req(u, fallbackArgs(cookie)), j.id, cb)
-                } else throw e
+            while (true) {
+                try { runYt(u); break }
+                catch (e: Exception) {
+                    if (j.cancel) throw Cancelled()
+                    if (j.paused) { waitResume(j); continue }
+                    throw e
+                }
             }
         }
         if (j.cancel) throw Cancelled()
