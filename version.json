@@ -1,8 +1,8 @@
 {
-  "version": 4,
-  "apk_version": 4,
+  "version": 5,
+  "apk_version": 5,
   "files": [
     "index.html"
   ],
-  "notes": "Layout restored, smoother UI, in-app stream proxy, faster watch."
+  "notes": "Stream fallbacks and playback diagnostics."
 }

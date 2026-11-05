@@ -136,6 +136,7 @@ class MainActivity : Activity() {
         @JavascriptInterface fun startProbe(text: String, cookies: String): String = Engine.startProbe(text, cookies)
         @JavascriptInterface fun startDownload(json: String): String = Engine.startDownload(json)
         @JavascriptInterface fun startStream(json: String): String = Engine.startStream(json)
+        @JavascriptInterface fun streamLog(): String = Engine.streamLog()
         @JavascriptInterface fun getJob(id: String): String = Engine.getJob(id)
         @JavascriptInterface fun cancel(id: String) = Engine.cancel(id)
         @JavascriptInterface fun pause(id: String) = Engine.pause(id)

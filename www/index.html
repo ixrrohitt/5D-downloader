@@ -148,6 +148,7 @@ window.fetch=async(url,o={})=>{const u=typeof url==="string"?url:url.url;if(!u.s
   if(u==="/api/probe"&&m==="POST"){const d=JSON.parse(b);return J({job_id:A.startProbe(d.url||"",d.cookies_file||"")})}
   if(u.startsWith("/api/job/")){const s=A.getJob(u.split("/").pop());if(!s)return J({error:"unknown job"},404);const j=JSON.parse(s);if(j.kind==="probe"&&j.status==="probe_done")j.probe=buildProbe(j);delete j.raw;return J(j)}
   if(u==="/api/stream"&&m==="POST")return J({job_id:A.startStream(b)});
+  if(u==="/api/streamlog")return J(JSON.parse(A.streamLog()));
   if(u==="/api/download"&&m==="POST")return J({job_id:A.startDownload(b)});
   if(u==="/api/pause"&&m==="POST"){A.pause(JSON.parse(b).job_id);return J({ok:true})}
   if(u==="/api/resume"&&m==="POST"){A.resume(JSON.parse(b).job_id);return J({ok:true})}
@@ -351,15 +352,20 @@ function syncAV(v,a){const sy=()=>{if(Math.abs(a.currentTime-v.currentTime)>.35)
  v.addEventListener("volumechange",()=>{a.volume=v.volume;a.muted=v.muted});
  plTimer=setInterval(()=>{if(!v.paused)sy()},1000)}
 function openPlayer(r){closePlayer();const e2=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ const cands=[r,...(r.alts||[]).map(a=>({kind:r.kind,title:r.title,height:r.height,url:a.url,audio_url:a.audio_url||null,note:"fallback: "+a.label}))];let ci=0,okp=false,tm=null;
  const o=document.createElement("div");o.id="plr";o.style.cssText="position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);box-sizing:border-box";
- let md="";
- if(r.kind==="image")md=`<img src="${e2(r.url)}" style="max-width:100%;max-height:80vh">`;
- else if(r.kind==="audio")md=`<audio id="plm" src="${e2(r.url)}" controls autoplay style="width:92%"></audio>`;
- else md=`<video id="plm" src="${e2(r.url)}" controls autoplay playsinline preload="auto" style="width:100%;max-height:78vh;background:#000"></video>`+(r.audio_url?`<audio id="pla" src="${e2(r.audio_url)}" preload="auto"></audio>`:"");
- o.innerHTML=`<div style="color:#ddd;font:14px system-ui;padding:10px 14px;width:100%;box-sizing:border-box;display:flex;gap:10px;align-items:center"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e2(r.title)}${r.height?" · "+r.height+"p":""}</span><button id="plx" style="font:inherit;padding:6px 12px">✕ close</button></div>`+md+(r.note?`<p style="color:#999;font:12px system-ui;padding:8px 14px;text-align:center;margin:0">${e2(r.note)}</p>`:"");
+ o.innerHTML=`<div style="color:#ddd;font:14px system-ui;padding:10px 14px;width:100%;box-sizing:border-box;display:flex;gap:10px;align-items:center"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e2(r.title)}${r.height?" · "+r.height+"p":""}</span><button id="plx" style="font:inherit;padding:6px 12px">✕ close</button></div><div id="plbox" style="width:100%;display:flex;flex-direction:column;align-items:center"></div><p id="pln" style="color:#999;font:12px system-ui;padding:8px 14px;text-align:center;margin:0"></p><pre id="plog" style="color:#789;font:10px ui-monospace,monospace;max-width:94vw;white-space:pre-wrap;max-height:22vh;overflow:auto;margin:0;padding:0 14px;text-align:left"></pre>`;
  document.body.appendChild(o);$("#plx").onclick=closePlayer;
- const v=$("#plm"),a=$("#pla");if(v&&a)syncAV(v,a);
- if(v)v.onerror=()=>toast("Playback error"+(v.error?" ("+v.error.code+")":"")+" — try Download instead")}
+ const fail=async why=>{$("#pln").textContent="Could not play this stream ("+why+"). Use Download instead.";try{const l=await api("/api/streamlog");$("#plog").textContent=(l||[]).join("\n")}catch(_){}};
+ const mount=()=>{clearInterval(plTimer);clearTimeout(tm);okp=false;const c=cands[ci];let md="";
+  if(c.kind==="image")md=`<img src="${e2(c.url)}" style="max-width:100%;max-height:80vh">`;
+  else if(c.kind==="audio")md=`<audio id="plm" src="${e2(c.url)}" controls autoplay style="width:92%"></audio>`;
+  else md=`<video id="plm" src="${e2(c.url)}" controls autoplay playsinline preload="auto" style="width:100%;max-height:70vh;background:#000"></video>`+(c.audio_url?`<audio id="pla" src="${e2(c.audio_url)}" preload="auto"></audio>`:"");
+  $("#plbox").innerHTML=md;$("#pln").textContent=c.note||"";
+  const v=$("#plm"),a=$("#pla");if(v&&a)syncAV(v,a);
+  const bad=why=>{if(okp)return;clearTimeout(tm);if(ci<cands.length-1){ci++;toast("Trying another way to play…");mount()}else fail(why)};
+  if(v){v.onplaying=()=>{okp=true;clearTimeout(tm)};v.onerror=()=>bad("error "+(v.error?v.error.code:"?"));tm=setTimeout(()=>bad("no data after 15 s"),15000)}};
+ mount()}
 $("#watch").onclick=async()=>{if(!S.probe)return;const p=S.probe,ix=selIdx();if(!ix.length){toast("pick one to watch");return}
  const it=p.videos[ix[0]],u=it&&it.url;if(!u){toast("nothing to play");return}
  const wq=(()=>{const v=it,vf=S.vf||"mp4";if(S.media==="audio"){const a=bestAud(v,"any");return{v:"",a:a?a.id:""}}const q=pickQ(v,S.res,vf);return{v:q?q.vid.id:"",a:q&&q.aud?q.aud.id:""}})();

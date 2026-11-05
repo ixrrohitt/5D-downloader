@@ -271,6 +271,10 @@ object Engine {
         val aRank: Int get() = if (ext == "m4a" || ext == "mp4" || ac.startsWith("mp4a")) 0 else 1
     }
 
+    private val slog = java.util.ArrayDeque<String>()
+    private fun slogAdd(m: String) { synchronized(slog) { slog.add(SimpleDateFormat("HH:mm:ss", Locale.US).format(Date()) + " " + m); while (slog.size > 30) slog.removeFirst() } }
+    fun streamLog(): String = synchronized(slog) { JSONArray(slog.toList()).toString() }
+
     private class StreamSrc(val url: String, val headers: Map<String, String>, val mime: String)
     private val streams = java.util.concurrent.ConcurrentHashMap<String, StreamSrc>()
 
@@ -301,6 +305,7 @@ object Engine {
             if (c.getRequestProperty("User-Agent") == null) c.setRequestProperty("User-Agent", UA)
             c.setRequestProperty("Range", range ?: "bytes=0-")
             val code = c.responseCode
+            slogAdd("stream ${URL(s.url).host} range=${range ?: "none"} -> HTTP $code type=${c.contentType} len=${c.getHeaderField("Content-Length")} mime=${s.mime}")
             val hdr = HashMap<String, String>()
             hdr["Accept-Ranges"] = "bytes"; hdr["Access-Control-Allow-Origin"] = "*"
             val status = if (code == 206 && range == null) 200 else code
@@ -312,6 +317,7 @@ object Engine {
             }
             WebResourceResponse(s.mime, null, status, if (status == 206) "Partial Content" else if (status < 400) "OK" else "Error", hdr, body)
         } catch (e: Exception) {
+            slogAdd("stream error: ${e.javaClass.simpleName}: ${(e.message ?: "").take(120)}")
             WebResourceResponse(s.mime, null, 502, "Bad Gateway", mapOf("Access-Control-Allow-Origin" to "*"), java.io.ByteArrayInputStream(ByteArray(0)))
         }
     }
@@ -351,7 +357,9 @@ object Engine {
         val hls = fm.filter { it.proto.startsWith("m3u8") }
         val bestA = prog.filter { it.hasA && !it.hasV }.sortedWith(compareByDescending<Fmt> { it.rate }.thenBy { it.aRank }).firstOrNull()
         val out = JSONObject().put("title", str(info, "title").ifEmpty { "Preview" })
+        var chosenV: Fmt? = null; var chosenA: Fmt? = null
         fun single(f: Fmt, kind: String, note: String? = null) {
+            chosenV = f
             out.put("kind", kind).put("url", proxied(f))
             if (f.h > 0) out.put("height", f.h)
             if (note != null) out.put("note", note)
@@ -367,7 +375,7 @@ object Engine {
                 val fv = fm.firstOrNull { it.o.optString("format_id") == vidId }
                 if (fv != null) {
                     single(fv, if (fv.proto.startsWith("m3u8")) "hls" else "video")
-                    if (!fv.hasA && fa != null) { out.put("audio_url", proxied(fa)); out.put("note", "HD stream: video and audio load separately and are kept in sync.") }
+                    if (!fv.hasA && fa != null) { out.put("audio_url", proxied(fa)); chosenA = fa; out.put("note", "HD stream: video and audio load separately and are kept in sync.") }
                     ok = true
                 }
             }
@@ -381,7 +389,7 @@ object Engine {
                 val comb = byQ(prog.filter { it.hasV && it.hasA && it.h <= cap }).firstOrNull()
                 val vo = byQ(prog.filter { it.hasV && !it.hasA && it.h in 1..cap }).firstOrNull()
                 if (vo != null && bestA != null && (comb == null || vo.h > comb.h)) {
-                    single(vo, "video", "HD stream: video and audio load separately and are kept in sync."); out.put("audio_url", proxied(bestA)); return true
+                    single(vo, "video", "HD stream: video and audio load separately and are kept in sync."); out.put("audio_url", proxied(bestA)); chosenA = bestA; return true
                 }
                 if (comb != null) { single(comb, "video"); return true }
                 val hl = byQ(hls.filter { it.hasV && it.h <= cap }).firstOrNull()
@@ -397,6 +405,17 @@ object Engine {
             if (gu.startsWith("http")) { out.put("kind", if (media == "audio") "audio" else "video").put("url", gu); ok = true }
         }
         if (!ok) { j.fail("No directly playable stream found for this link. Use Download instead."); return }
+        // fallbacks the player tries automatically if the first way does not start: direct links, then one combined file
+        val alts = JSONArray()
+        fun alt(label: String, v: String, a: String?) { alts.put(JSONObject().put("label", label).put("url", v).apply { if (a != null) put("audio_url", a) }) }
+        val cv = chosenV; val ca = chosenA
+        if (cv != null && (cv.proto == "https" || cv.proto == "http")) alt("direct link", cv.url, ca?.url)
+        if (media != "audio") {
+            val comb = byQ(prog.filter { it.hasV && it.hasA && (cv == null || cv.h == 0 || it.h <= cv.h) }).firstOrNull() ?: byQ(prog.filter { it.hasV && it.hasA }).firstOrNull()
+            if (comb != null && comb !== cv) { alt("single file ${comb.h}p", proxied(comb), null); alt("single file ${comb.h}p direct", comb.url, null) }
+        }
+        out.put("alts", alts)
+        slogAdd("stream ready: ${out.optString("kind")} ${out.optInt("height", 0)}p, ${alts.length()} fallback(s)")
         finishStream(j, out)
     }
 
