@@ -10,6 +10,7 @@ import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import org.json.JSONArray
 import org.json.JSONObject
+import android.webkit.WebResourceResponse
 import java.io.File
 import java.net.HttpURLConnection
 import java.util.concurrent.atomic.AtomicReference
@@ -201,7 +202,13 @@ object Engine {
     private val infoCache = object : LinkedHashMap<String, String>(16, 0.75f, true) {
         override fun removeEldestEntry(e: MutableMap.MutableEntry<String, String>?) = size > 24
     }
-    private fun cachePut(u: String, raw: String) { synchronized(infoCache) { infoCache[u] = raw } }
+    private fun cachePut(u: String, raw: String) {
+        synchronized(infoCache) {
+            infoCache[u] = raw
+            // also under the canonical page URL, which is what the UI sends later for "Watch"
+            Regex("\"webpage_url\"\\s*:\\s*\"([^\"]+)\"").find(raw)?.groupValues?.get(1)?.let { infoCache[it] = raw }
+        }
+    }
     private fun cacheGet(u: String): String? = synchronized(infoCache) { infoCache[u] }
 
     private fun dump(url: String, mode: String, cookie: String?): String {
@@ -264,6 +271,51 @@ object Engine {
         val aRank: Int get() = if (ext == "m4a" || ext == "mp4" || ac.startsWith("mp4a")) 0 else 1
     }
 
+    private class StreamSrc(val url: String, val headers: Map<String, String>, val mime: String)
+    private val streams = java.util.concurrent.ConcurrentHashMap<String, StreamSrc>()
+
+    /** Plays through the app: the WebView asks /stream/<token>, openStream() fetches it with yt-dlp's own headers. */
+    private fun proxied(f: Fmt): String {
+        if (!(f.proto == "https" || f.proto == "http")) return f.url        // HLS etc.: hand over as it is
+        val hs = HashMap<String, String>()
+        f.o.optJSONObject("http_headers")?.let { h -> val ks = h.keys(); while (ks.hasNext()) { val k = ks.next(); hs[k] = h.optString(k) } }
+        val mime = when (f.ext) {
+            "mp4" -> if (f.hasV) "video/mp4" else "audio/mp4"
+            "m4a" -> "audio/mp4"
+            "webm" -> if (f.hasV) "video/webm" else "audio/webm"
+            "mp3" -> "audio/mpeg"; "ogg", "opus" -> "audio/ogg"
+            else -> "application/octet-stream"
+        }
+        val tok = java.util.UUID.randomUUID().toString().replace("-", "")
+        if (streams.size > 40) streams.clear()
+        streams[tok] = StreamSrc(f.url, hs, mime)
+        return "https://appassets.androidplatform.net/stream/$tok"
+    }
+
+    fun openStream(tok: String, range: String?): WebResourceResponse? {
+        val s = streams[tok] ?: return null
+        return try {
+            val c = URL(s.url).openConnection() as HttpURLConnection
+            c.connectTimeout = 15000; c.readTimeout = 30000; c.instanceFollowRedirects = true
+            for ((k, v) in s.headers) c.setRequestProperty(k, v)
+            if (c.getRequestProperty("User-Agent") == null) c.setRequestProperty("User-Agent", UA)
+            c.setRequestProperty("Range", range ?: "bytes=0-")
+            val code = c.responseCode
+            val hdr = HashMap<String, String>()
+            hdr["Accept-Ranges"] = "bytes"; hdr["Access-Control-Allow-Origin"] = "*"
+            val status = if (code == 206 && range == null) 200 else code
+            if (status == 206) c.getHeaderField("Content-Range")?.let { hdr["Content-Range"] = it }
+            c.getHeaderField("Content-Length")?.let { hdr["Content-Length"] = it }
+            val st = (if (code >= 400) c.errorStream else c.inputStream) ?: return null
+            val body = object : java.io.FilterInputStream(st) {
+                override fun close() { try { super.close() } finally { c.disconnect() } }
+            }
+            WebResourceResponse(s.mime, null, status, if (status == 206) "Partial Content" else if (status < 400) "OK" else "Error", hdr, body)
+        } catch (e: Exception) {
+            WebResourceResponse(s.mime, null, 502, "Bad Gateway", mapOf("Access-Control-Allow-Origin" to "*"), java.io.ByteArrayInputStream(ByteArray(0)))
+        }
+    }
+
     fun startStream(json: String): String {
         val d = JSONObject(json)
         val j = newJob("stream")
@@ -300,7 +352,7 @@ object Engine {
         val bestA = prog.filter { it.hasA && !it.hasV }.sortedWith(compareByDescending<Fmt> { it.rate }.thenBy { it.aRank }).firstOrNull()
         val out = JSONObject().put("title", str(info, "title").ifEmpty { "Preview" })
         fun single(f: Fmt, kind: String, note: String? = null) {
-            out.put("kind", kind).put("url", f.url)
+            out.put("kind", kind).put("url", proxied(f))
             if (f.h > 0) out.put("height", f.h)
             if (note != null) out.put("note", note)
         }
@@ -315,7 +367,7 @@ object Engine {
                 val fv = fm.firstOrNull { it.o.optString("format_id") == vidId }
                 if (fv != null) {
                     single(fv, if (fv.proto.startsWith("m3u8")) "hls" else "video")
-                    if (!fv.hasA && fa != null) { out.put("audio_url", fa.url); out.put("note", "HD stream: video and audio load separately and are kept in sync.") }
+                    if (!fv.hasA && fa != null) { out.put("audio_url", proxied(fa)); out.put("note", "HD stream: video and audio load separately and are kept in sync.") }
                     ok = true
                 }
             }
@@ -329,7 +381,7 @@ object Engine {
                 val comb = byQ(prog.filter { it.hasV && it.hasA && it.h <= cap }).firstOrNull()
                 val vo = byQ(prog.filter { it.hasV && !it.hasA && it.h in 1..cap }).firstOrNull()
                 if (vo != null && bestA != null && (comb == null || vo.h > comb.h)) {
-                    single(vo, "video", "HD stream: video and audio load separately and are kept in sync."); out.put("audio_url", bestA.url); return true
+                    single(vo, "video", "HD stream: video and audio load separately and are kept in sync."); out.put("audio_url", proxied(bestA)); return true
                 }
                 if (comb != null) { single(comb, "video"); return true }
                 val hl = byQ(hls.filter { it.hasV && it.h <= cap }).firstOrNull()
@@ -914,7 +966,7 @@ object Engine {
                 "$nm.%(ext)s"
             } else "%(title).120B.%(ext)s"
             r.addOption("-o", work.absolutePath + "/" + tpl)
-            if (media == "audio") { r.addOption("-x"); r.addOption("--audio-format", af); r.addOption("--audio-quality", if (aq == "0") "0" else aq + "K") }
+            if (media == "audio") { r.addOption("-x"); r.addOption("--audio-format", af); r.addOption("--audio-quality", if (aq == "0") "0" else minOf(aq.toInt(), if (af == "mp3") 320 else 512).toString() + "K") }
             else r.addOption("--merge-output-format", if (vf == "best") "mkv" else vf)
             if (playlist) {
                 val items = d.optString("playlist_items", "").trim()

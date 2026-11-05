@@ -69,7 +69,13 @@ class MainActivity : Activity() {
                 cacheMode = WebSettings.LOAD_DEFAULT
             }
             webViewClient = object : WebViewClient() {
-                override fun shouldInterceptRequest(v: WebView, r: WebResourceRequest): WebResourceResponse? = loader.shouldInterceptRequest(r.url)
+                override fun shouldInterceptRequest(v: WebView, r: WebResourceRequest): WebResourceResponse? {
+                    val path = r.url.path ?: ""
+                    // "watch without downloading": media is fetched by the app (with the right headers) and handed to the player
+                    if (r.url.host == "appassets.androidplatform.net" && path.startsWith("/stream/"))
+                        return Engine.openStream(path.removePrefix("/stream/"), r.requestHeaders["Range"])
+                    return loader.shouldInterceptRequest(r.url)
+                }
                 override fun shouldOverrideUrlLoading(v: WebView, r: WebResourceRequest): Boolean {
                     if (r.url.host == "appassets.androidplatform.net") return false
                     try { startActivity(Intent(Intent.ACTION_VIEW, r.url)) } catch (e: Exception) {}

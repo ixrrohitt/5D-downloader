@@ -72,13 +72,27 @@ pre{font:11px/1.65 ui-monospace,monospace;color:#8fe;white-space:pre-wrap;margin
 #bglog .warn{color:#fd6}#bglog .error{color:#f77}#bglog .ok{color:#7f9}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 
-/* layout fixes: scrollable steps, own area for action buttons, no overlapping */
-.step{justify-content:flex-start;overflow-y:auto;overflow-x:hidden;padding-top:max(9vh,env(safe-area-inset-top));padding-bottom:max(4vh,env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
-.step>*{flex-shrink:0;max-width:100%}
-.step>:first-child{margin-top:auto}
-.acts{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;position:relative;z-index:3}
+/* choose screen scrolls when it is tall (the other screens keep their original bottom-anchored layout);
+   action buttons get their own non-overlapping area */
+#s-choose{justify-content:flex-start;overflow-y:auto;overflow-x:hidden;padding-top:max(7vh,env(safe-area-inset-top));padding-bottom:max(4vh,env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#s-choose::-webkit-scrollbar{display:none}
+#s-choose>*{flex-shrink:0;max-width:100%}
+#s-choose>:first-child{margin-top:auto}
+.acts{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;flex-shrink:0;position:relative;z-index:3}
 .acts>*{margin:0!important}
 #qinfo{max-width:92vw;margin:0;line-height:1.5}
+/* tidy option rows with small captions, and softer press/appear motion */
+.chips[data-cap]::before{content:attr(data-cap);flex-basis:100%;text-align:center;font:600 10px ui-sans-serif;letter-spacing:.24em;color:var(--mu);opacity:.85;margin-bottom:-2px}
+#vfmt .ch,#afmt .ch,#aqual .ch{min-width:62px;padding:7px 12px;border-radius:14px}
+.ch,.pill,.launch,.lnk,.tile{-webkit-tap-highlight-color:transparent}
+.ch:active,.pill:active,.tile:active{transform:scale(.95)}
+.launch:active{transform:scale(.97)}
+.chips .ch{animation:chIn .5s var(--e) backwards}
+.chips .ch:nth-child(2){animation-delay:.03s}.chips .ch:nth-child(3){animation-delay:.06s}.chips .ch:nth-child(4){animation-delay:.09s}.chips .ch:nth-child(5){animation-delay:.12s}.chips .ch:nth-child(6){animation-delay:.15s}.chips .ch:nth-child(7){animation-delay:.18s}.chips .ch:nth-child(8){animation-delay:.21s}
+@keyframes chIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+#plr{animation:plIn .35s var(--e)}
+@keyframes plIn{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.chips .ch,#plr{animation:none}}
 </style></head><body>
 <canvas id="c"></canvas><div id="bglog" aria-hidden="true"></div>
 <div class="bar"><div class="mark grad">3·4·5D</div><div class="sp"></div>
@@ -266,11 +280,18 @@ function showProbe(j){$("#cT").textContent=j.title;
  $("#vfmt").innerHTML=[["mp4","mp4"],["mkv","mkv"],["webm","webm"],["best","original"]].map(([k,l])=>`<span class="ch ${k===S.vf?"on":""}" data-vf="${k}"><b>${l}</b></span>`).join("");
  $("#afmt").innerHTML=[["mp3","mp3"],["m4a","m4a"],["opus","opus"],["ogg","ogg"],["flac","flac"],["wav","wav"],["best","original"]].map(([k,l])=>`<span class="ch ${k===S.af?"on":""}" data-af="${k}"><b>${l}</b></span>`).join("");
  if(!$("#aqual"))$("#afmt").insertAdjacentHTML("afterend",'<div class="chips" id="aqual"></div>');
- {const L=[96,128,160,192,256,320],ab=j.abr||0,best=ab?(L.find(x=>x>=ab-2)||320):192,lad=L.filter(x=>x<best&&x>=96).slice(-2).reverse();S.aq=""+best;
-  $("#aqual").innerHTML=[[""+best,best+"k · best"],...lad.map(k=>[""+k,k+"k"])].map(([k,l])=>`<span class="ch ${k===S.aq?"on":""}" data-aq="${k}"><b>${l}</b><small>—</small></span>`).join("")}
+ S.abrMax=j.abr||0;buildAq(true);
+ $("#chips").dataset.cap="VIDEO QUALITY";$("#vfmt").dataset.cap="VIDEO FORMAT";$("#afmt").dataset.cap="AUDIO FORMAT";$("#aqual").dataset.cap="AUDIO QUALITY";
  setMedia("video");go("choose")}
+/* audio quality choices: "best" = the highest bitrate this source really has (capped by what the chosen format can hold),
+   the other chips are standard steps below it (not lower than 96k) */
+function buildAq(reset){const ab=S.abrMax||0,af=S.af||"mp3",cap=af==="mp3"?320:512,L=[96,112,128,160,192,224,256,320,384,448],best=ab?Math.min(Math.round(ab),cap):0;let o;
+ if(best){const nr=t=>L.reduce((a,b)=>Math.abs(b-t)<Math.abs(a-t)?b:a),lo=[...new Set([.4,.5,.6,.8].map(r=>nr(best*r)).filter(x=>x>=96&&x<best*.97))].sort((a,b)=>a-b);o=[...lo.map(k=>[""+k,k+"k"]),[""+best,best+"k · best"]]}
+ else o=[["96","96k"],["128","128k"],["192","192k"],["0","best"]];
+ if(reset||!o.some(x=>x[0]===S.aq))S.aq=o[o.length-1][0];
+ $("#aqual").innerHTML=o.map(([k,l])=>`<span class="ch ${k===S.aq?"on":""}" data-aq="${k}"><b>${l}</b><small>—</small></span>`).join("");if(!reset)updateSizes()}
 function updAq(aud){const e=$("#aqual");if(e)e.style.display=(aud&&["mp3","m4a","opus","ogg","aac"].includes(S.af))?"":"none"}
-document.addEventListener("click",e=>{const q=e.target.closest("[data-aq]");if(q){S.aq=q.dataset.aq;$$("#aqual .ch").forEach(x=>x.classList.toggle("on",x===q));tone(600,.2);updateSizes()}const v=e.target.closest("[data-vf]"),a=e.target.closest("[data-af]");if(v){S.vf=v.dataset.vf;$$("#vfmt .ch").forEach(x=>x.classList.toggle("on",x===v));tone(600,.2);updateSizes()}if(a){S.af=a.dataset.af;$$("#afmt .ch").forEach(x=>x.classList.toggle("on",x===a));tone(600,.2);updAq(S.media==="audio");updateSizes()}});
+document.addEventListener("click",e=>{const q=e.target.closest("[data-aq]");if(q){S.aq=q.dataset.aq;$$("#aqual .ch").forEach(x=>x.classList.toggle("on",x===q));tone(600,.2);updateSizes()}const v=e.target.closest("[data-vf]"),a=e.target.closest("[data-af]");if(v){S.vf=v.dataset.vf;$$("#vfmt .ch").forEach(x=>x.classList.toggle("on",x===v));tone(600,.2);updateSizes()}if(a){S.af=a.dataset.af;$$("#afmt .ch").forEach(x=>x.classList.toggle("on",x===a));tone(600,.2);buildAq(false);updAq(S.media==="audio");updateSizes()}});
 $("#chips").onclick=e=>{const c=e.target.closest("[data-r]");if(!c)return;S.res=+c.dataset.r;$$("#chips .ch").forEach(x=>x.classList.toggle("on",x===c));updateSizes();tone(600,.2)};
 function fail(msg,back){logOff();S.busy=false;try{localStorage.removeItem("ytdl_job")}catch(_){}$("#fErr").textContent=msg;toast(msg.slice(0,60));phase("error");go(back);setTimeout(()=>phase("idle"),50)}
 function phaseOf(j,cur){const s=j.stage||"";if(j.status==="done")return"done";if(j.status==="error")return"error";if(/Merg/i.test(s))return"merge";if(/Extract|Convert|Audio/i.test(s))return"convert";if(/ZIP/i.test(s))return"zip";if(j.status==="fetching")return"fetch";if(/^Downloading/i.test(s))return"download";return cur}
@@ -334,17 +355,17 @@ function openPlayer(r){closePlayer();const e2=s=>String(s==null?"":s).replace(/[
  let md="";
  if(r.kind==="image")md=`<img src="${e2(r.url)}" style="max-width:100%;max-height:80vh">`;
  else if(r.kind==="audio")md=`<audio id="plm" src="${e2(r.url)}" controls autoplay style="width:92%"></audio>`;
- else md=`<video id="plm" src="${e2(r.url)}" controls autoplay playsinline style="width:100%;max-height:78vh;background:#000"></video>`+(r.audio_url?`<audio id="pla" src="${e2(r.audio_url)}" preload="auto"></audio>`:"");
+ else md=`<video id="plm" src="${e2(r.url)}" controls autoplay playsinline preload="auto" style="width:100%;max-height:78vh;background:#000"></video>`+(r.audio_url?`<audio id="pla" src="${e2(r.audio_url)}" preload="auto"></audio>`:"");
  o.innerHTML=`<div style="color:#ddd;font:14px system-ui;padding:10px 14px;width:100%;box-sizing:border-box;display:flex;gap:10px;align-items:center"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e2(r.title)}${r.height?" · "+r.height+"p":""}</span><button id="plx" style="font:inherit;padding:6px 12px">✕ close</button></div>`+md+(r.note?`<p style="color:#999;font:12px system-ui;padding:8px 14px;text-align:center;margin:0">${e2(r.note)}</p>`:"");
  document.body.appendChild(o);$("#plx").onclick=closePlayer;
  const v=$("#plm"),a=$("#pla");if(v&&a)syncAV(v,a);
- if(v)v.onerror=()=>toast("Could not play this stream here — use Download instead")}
+ if(v)v.onerror=()=>toast("Playback error"+(v.error?" ("+v.error.code+")":"")+" — try Download instead")}
 $("#watch").onclick=async()=>{if(!S.probe)return;const p=S.probe,ix=selIdx();if(!ix.length){toast("pick one to watch");return}
  const it=p.videos[ix[0]],u=it&&it.url;if(!u){toast("nothing to play");return}
  const wq=(()=>{const v=it,vf=S.vf||"mp4";if(S.media==="audio"){const a=bestAud(v,"any");return{v:"",a:a?a.id:""}}const q=pickQ(v,S.res,vf);return{v:q?q.vid.id:"",a:q&&q.aud?q.aud.id:""}})();
  const b=$("#watch"),t0=b.textContent;b.disabled=true;b.textContent="preparing stream…";
  try{const{job_id}=await api("/api/stream",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:u,resolution:S.res,media_type:S.media,cookies_file:S.cookie,video_id:wq.v,audio_id:wq.a})});
-  let j=null;for(let n=0;n<375;n++){await new Promise(r=>setTimeout(r,400));j=await api("/api/job/"+job_id);if(j.status==="stream_done"||j.status==="error")break}
+  let j=null;for(let n=0;n<375;n++){await new Promise(r=>setTimeout(r,400));b.textContent="preparing stream… "+((n*.4)|0)+"s";j=await api("/api/job/"+job_id);if(j.status==="stream_done"||j.status==="error")break}
   if(!j||j.status!=="stream_done")throw new Error((j&&j.error)||"could not prepare the stream");
   openPlayer(j.result)}
  catch(e){toast(e.message)}finally{b.disabled=false;b.textContent=t0}};
