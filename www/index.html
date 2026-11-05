@@ -71,6 +71,14 @@ pre{font:11px/1.65 ui-monospace,monospace;color:#8fe;white-space:pre-wrap;margin
 #bglog div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:lg .7s var(--e) backwards}@keyframes lg{from{opacity:0;transform:translate3d(0,8px,0)}}
 #bglog .warn{color:#fd6}#bglog .error{color:#f77}#bglog .ok{color:#7f9}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* layout fixes: scrollable steps, own area for action buttons, no overlapping */
+.step{justify-content:flex-start;overflow-y:auto;overflow-x:hidden;padding-top:max(9vh,env(safe-area-inset-top));padding-bottom:max(4vh,env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.step>*{flex-shrink:0;max-width:100%}
+.step>:first-child{margin-top:auto}
+.acts{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;position:relative;z-index:3}
+.acts>*{margin:0!important}
+#qinfo{max-width:92vw;margin:0;line-height:1.5}
 </style></head><body>
 <canvas id="c"></canvas><div id="bglog" aria-hidden="true"></div>
 <div class="bar"><div class="mark grad">3·4·5D</div><div class="sp"></div>
@@ -86,9 +94,9 @@ pre{font:11px/1.65 ui-monospace,monospace;color:#8fe;white-space:pre-wrap;margin
   <button class="tile on" data-v="video"><svg viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="15" rx="3.5"/><path d="M10 9.2v5.6l4.6-2.8z"/></svg><b>Video</b><small id="tV">MP4</small></button>
   <button class="tile" data-v="audio"><svg viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4.5" height="6.5" rx="2"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="2"/></svg><b>Audio</b><small id="tA">MP3</small></button></div>
  <div class="chips" id="chips"></div>
- <div class="usage" id="usage"></div>
- <button class="launch mag" id="goD"><span class="lt"><b>Download</b><small id="lsz">—</small></span><i class="la">→</i></button><button class="lnk" id="watch">▶ Watch without downloading</button><button class="lnk" id="back">← new link</button></section>
-<section class="step" id="s-prog"><div id="pnum" data-big>0%</div><h2 class="t2" id="pT">Downloading</h2><p class="hint" id="pS"></p><p class="hint small" id="pF"></p><button class="pill mag" id="pause">⏸ PAUSE</button><button class="pill mag" id="bgGo" style="display:none">⏸ keep paused · new link</button><button class="pill cancel mag" id="cancel">✕ CANCEL</button></section>
+ <div class="usage" id="usage"></div><p class="hint small" id="qinfo"></p>
+ <div class="acts"><button class="launch" id="goD"><span class="lt"><b>Download</b><small id="lsz">—</small></span><i class="la">→</i></button><button class="lnk" id="watch">▶ Watch without downloading</button><button class="lnk" id="back">← new link</button></div></section>
+<section class="step" id="s-prog"><div id="pnum" data-big>0%</div><h2 class="t2" id="pT">Downloading</h2><p class="hint" id="pS"></p><p class="hint small" id="pF"></p><div class="acts"><button class="pill" id="pause">⏸ PAUSE</button><button class="pill" id="bgGo" style="display:none">⏸ keep paused · new link</button><button class="pill cancel" id="cancel">✕ CANCEL</button></div></section>
 <section class="step" id="s-done"><div class="big" data-big>DONE</div><div class="dl" id="links"></div><button class="pill mag" id="again">+ ANOTHER</button></section>
 
 <div class="shade" id="shade"></div>
@@ -110,11 +118,12 @@ function sizesOf(fm,d){let ba=null,bs=-1;for(const f of fm)if(none(f.vcodec)&&!n
  const o={};for(const h in by)o[h]=by[h][1];return o}
 function entry(i,url){const d=i.duration,th=i.thumbnail||(i.thumbnails&&i.thumbnails.length?i.thumbnails[i.thumbnails.length-1].url:null);let sizes=sizesOf(i.formats||[],d),est=false;
  if(!Object.keys(sizes).length&&d){sizes={};for(const h in EST)sizes[h]=Math.round(d*EST[h]);est=true}
- return{title:i.title||url||"(untitled)",url:i.webpage_url||url,duration:d,thumbnail:th,sizes,est,audio:d?Math.round(d*24000):null}}
+ const fm=(i.formats||[]).filter(f=>f.format_id&&f.ext!=="mhtml"&&!/storyboard/i.test(f.format_note||"")).map(f=>({id:f.format_id,ext:f.ext,h:f.height||0,fps:f.fps||0,vc:f.vcodec||"",ac:f.acodec||"",abr:f.abr||0,tbr:f.tbr||0,sz:f.filesize||f.filesize_approx||0,ap:!f.filesize}));
+ return{title:i.title||url||"(untitled)",url:i.webpage_url||url,duration:d,thumbnail:th,sizes,est,audio:d?Math.round(d*24000):null,fm}}
 const cache={};
 function buildProbe(j){if(cache[j.id])return cache[j.id];const raws=j.raw||[],videos=[];let title="video",hs=null,ab=0;
  for(const r of raws){try{const o=JSON.parse(r);for(const f of(o.formats||[]))if(f.acodec&&f.acodec!=="none"&&f.abr>ab)ab=f.abr}catch(_){}}
- if(j.mode==="multiple"){raws.forEach((r,i)=>{let e;try{e=entry(JSON.parse(r),j.urls[i])}catch(_){e={title:j.urls[i],url:j.urls[i],duration:null,thumbnail:null,sizes:{},est:false,audio:null}}videos.push(e)});title=videos.length+" videos";const s=new Set();videos.forEach(v=>Object.keys(v.sizes).forEach(h=>s.add(+h)));hs=[...s].sort((a,b)=>a-b)}
+ if(j.mode==="multiple"){raws.forEach((r,i)=>{let e;try{e=entry(JSON.parse(r),j.urls[i])}catch(_){e={title:j.urls[i],url:j.urls[i],duration:null,thumbnail:null,sizes:{},est:false,audio:null}}videos.push(e)});title=videos.length+" videos";const s=new Set();videos.forEach(v=>{(v.fm||[]).forEach(f=>{if(f.h&&!none(f.vc))s.add(f.h)});Object.keys(v.sizes).forEach(h=>s.add(+h))});hs=[...s].sort((a,b)=>a-b)}
  else{const info=JSON.parse(raws[0]);title=info.title||"video";
   if(j.mode==="playlist"||info.entries){for(const e of(info.entries||[]).slice(0,200)){if(!e)continue;let u=e.url||e.webpage_url||"";if(u&&!u.startsWith("http"))u="https://www.youtube.com/watch?v="+u;videos.push(entry(e,u))}}
   else{videos.push(entry(info,j.urls[0]));hs=[...new Set((info.formats||[]).filter(f=>f.height&&f.vcodec!=="none").map(f=>f.height))].sort((a,b)=>a-b)}}
@@ -257,11 +266,11 @@ function showProbe(j){$("#cT").textContent=j.title;
  $("#vfmt").innerHTML=[["mp4","mp4"],["mkv","mkv"],["webm","webm"],["best","original"]].map(([k,l])=>`<span class="ch ${k===S.vf?"on":""}" data-vf="${k}"><b>${l}</b></span>`).join("");
  $("#afmt").innerHTML=[["mp3","mp3"],["m4a","m4a"],["opus","opus"],["ogg","ogg"],["flac","flac"],["wav","wav"],["best","original"]].map(([k,l])=>`<span class="ch ${k===S.af?"on":""}" data-af="${k}"><b>${l}</b></span>`).join("");
  if(!$("#aqual"))$("#afmt").insertAdjacentHTML("afterend",'<div class="chips" id="aqual"></div>');
- S.aq="0";{const mx=j.abr||160,lad=[320,256,192,160,128,96].filter(k=>k<mx-1&&k>=96).slice(0,3);
-  $("#aqual").innerHTML=[["0","best"+(j.abr?" ≈"+j.abr+"k":"")],...lad.map(k=>[""+k,k+"k"])].map(([k,l])=>`<span class="ch ${k===S.aq?"on":""}" data-aq="${k}"><b>${l}</b></span>`).join("")}
+ {const L=[96,128,160,192,256,320],ab=j.abr||0,best=ab?(L.find(x=>x>=ab-2)||320):192,lad=L.filter(x=>x<best&&x>=96).slice(-2).reverse();S.aq=""+best;
+  $("#aqual").innerHTML=[[""+best,best+"k · best"],...lad.map(k=>[""+k,k+"k"])].map(([k,l])=>`<span class="ch ${k===S.aq?"on":""}" data-aq="${k}"><b>${l}</b><small>—</small></span>`).join("")}
  setMedia("video");go("choose")}
 function updAq(aud){const e=$("#aqual");if(e)e.style.display=(aud&&["mp3","m4a","opus","ogg","aac"].includes(S.af))?"":"none"}
-document.addEventListener("click",e=>{const q=e.target.closest("[data-aq]");if(q){S.aq=q.dataset.aq;$$("#aqual .ch").forEach(x=>x.classList.toggle("on",x===q));tone(600,.2)}const v=e.target.closest("[data-vf]"),a=e.target.closest("[data-af]");if(v){S.vf=v.dataset.vf;$$("#vfmt .ch").forEach(x=>x.classList.toggle("on",x===v));tone(600,.2)}if(a){S.af=a.dataset.af;$$("#afmt .ch").forEach(x=>x.classList.toggle("on",x===a));tone(600,.2);updAq(S.media==="audio");updateSizes()}});
+document.addEventListener("click",e=>{const q=e.target.closest("[data-aq]");if(q){S.aq=q.dataset.aq;$$("#aqual .ch").forEach(x=>x.classList.toggle("on",x===q));tone(600,.2);updateSizes()}const v=e.target.closest("[data-vf]"),a=e.target.closest("[data-af]");if(v){S.vf=v.dataset.vf;$$("#vfmt .ch").forEach(x=>x.classList.toggle("on",x===v));tone(600,.2);updateSizes()}if(a){S.af=a.dataset.af;$$("#afmt .ch").forEach(x=>x.classList.toggle("on",x===a));tone(600,.2);updAq(S.media==="audio");updateSizes()}});
 $("#chips").onclick=e=>{const c=e.target.closest("[data-r]");if(!c)return;S.res=+c.dataset.r;$$("#chips .ch").forEach(x=>x.classList.toggle("on",x===c));updateSizes();tone(600,.2)};
 function fail(msg,back){logOff();S.busy=false;try{localStorage.removeItem("ytdl_job")}catch(_){}$("#fErr").textContent=msg;toast(msg.slice(0,60));phase("error");go(back);setTimeout(()=>phase("idle"),50)}
 function phaseOf(j,cur){const s=j.stage||"";if(j.status==="done")return"done";if(j.status==="error")return"error";if(/Merg/i.test(s))return"merge";if(/Extract|Convert|Audio/i.test(s))return"convert";if(/ZIP/i.test(s))return"zip";if(j.status==="fetching")return"fetch";if(/^Downloading/i.test(s))return"download";return cur}
@@ -273,8 +282,8 @@ async function poll(id,kind){const my=++tok;let fails=0;
   if(kind==="probe"){S.target=j.progress||0;$("#fS").textContent=j.stage||j.status;
    if(j.status==="probe_done"){logOff();S.probe=j.probe;S.target=0;phase("idle");showProbe(j.probe);return}
    if(j.status==="error"){fail(j.error||"Fetch failed","paste");return}}
-  else{phase(phaseOf(j,S.ph));const t=Math.max(1,j.total_items||1),d=j.completed_items||0;S.target=j.status==="done"?100:Math.min(99,(d+(j.current_pct||0)/100)/t*100);
-   $("#pS").textContent=fmtS(j.speed)+"  ·  eta "+fmtE(j.eta)+"  ·  "+Math.min(d,t)+"/"+t+" files";$("#pF").textContent=j.current_file||"";
+  else{phase(phaseOf(j,S.ph));const t=Math.max(1,j.total_items||1),d=j.completed_items||0,op=j.overall_pct;S.target=j.status==="done"?100:(op>=0?Math.min(99,op):Math.min(99,(d+(j.current_pct||0)/100)/t*100));
+   $("#pS").textContent=fmtS(j.speed)+"  ·  eta "+fmtE(j.eta)+"  ·  "+Math.min(d,t)+"/"+t+" files";$("#pF").textContent=(j.current_file||"")+(j.downloaded_bytes?"  ·  "+fb(j.downloaded_bytes)+(S.expect?" / ≈"+fb(S.expect):""):"");
    if(j.status==="done"){S.target=100;S.busy=false;try{localStorage.removeItem("ytdl_job")}catch(_){}done(j.links||[]);return}
    if(j.status==="error"){fail(j.error||"Download failed","choose");return}}}}
 function done(l){logOff();const app=!!window.Android,L=app&&l.length>5?l.slice(0,4):l;$("#links").innerHTML=l.length?L.map(x=>x.uri?`<a href="#" data-uri="${esc(x.uri)}">▶ ${esc(x.name)} <small>${x.size_mb} MB</small></a><button class="lnk" data-share="${esc(x.uri)}">share</button>`:`<a href="${x.url}" download>⬇ ${esc(x.name)} <small>${x.size_mb} MB${x.is_zip?" · zip":""}</small></a>`).join("")+(L.length<l.length?`<p class="hint">+${l.length-L.length} more · Downloads/5D-Downloader</p>`:app?'<p class="hint">saved in Downloads/5D-Downloader</p>':""):'<p class="hint">nothing came out — check the log</p>';
@@ -332,17 +341,19 @@ function openPlayer(r){closePlayer();const e2=s=>String(s==null?"":s).replace(/[
  if(v)v.onerror=()=>toast("Could not play this stream here — use Download instead")}
 $("#watch").onclick=async()=>{if(!S.probe)return;const p=S.probe,ix=selIdx();if(!ix.length){toast("pick one to watch");return}
  const it=p.videos[ix[0]],u=it&&it.url;if(!u){toast("nothing to play");return}
+ const wq=(()=>{const v=it,vf=S.vf||"mp4";if(S.media==="audio"){const a=bestAud(v,"any");return{v:"",a:a?a.id:""}}const q=pickQ(v,S.res,vf);return{v:q?q.vid.id:"",a:q&&q.aud?q.aud.id:""}})();
  const b=$("#watch"),t0=b.textContent;b.disabled=true;b.textContent="preparing stream…";
- try{const{job_id}=await api("/api/stream",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:u,resolution:S.res,media_type:S.media,cookies_file:S.cookie})});
-  let j=null;for(let n=0;n<150;n++){await new Promise(r=>setTimeout(r,1000));j=await api("/api/job/"+job_id);if(j.status==="stream_done"||j.status==="error")break}
+ try{const{job_id}=await api("/api/stream",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:u,resolution:S.res,media_type:S.media,cookies_file:S.cookie,video_id:wq.v,audio_id:wq.a})});
+  let j=null;for(let n=0;n<375;n++){await new Promise(r=>setTimeout(r,400));j=await api("/api/job/"+job_id);if(j.status==="stream_done"||j.status==="error")break}
   if(!j||j.status!=="stream_done")throw new Error((j&&j.error)||"could not prepare the stream");
   openPlayer(j.result)}
  catch(e){toast(e.message)}finally{b.disabled=false;b.textContent=t0}};
 
 $("#goD").onclick=async()=>{if(!S.probe||S.busy)return;const p=S.probe,ix=selIdx();if(!ix.length){toast("pick at least one");return}
- let urls,pi="";if(p.mode==="playlist"){urls=[p.urls[0]];pi=rng(ix)}else urls=ix.map(i=>p.videos[i].url).filter(Boolean);
+ let urls,pi="",fids=[];if(p.mode==="playlist"){urls=[p.urls[0]];pi=rng(ix)}else{const pr=ix.map(i=>[p.videos[i].url,fidOf(p.videos[i])]).filter(x=>x[0]);urls=pr.map(x=>x[0]);fids=pr.map(x=>x[1])}
+ const exp=total(S.res,S.media).sum;S.expect=exp;
  S.busy=true;S.disp=0;S.target=1;S.paused=false;$("#pause").textContent="⏸ PAUSE";$("#bgGo").style.display="none";cancelReset();$("#pT").textContent="Downloading";phase("download");go("prog");
- try{const{job_id}=await api("/api/download",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mode:p.mode,media_type:S.media,resolution:S.res,video_format:S.vf||"mp4",audio_format:S.af||"mp3",audio_quality:S.aq||"0",urls,playlist_items:pi,total_items:ix.length,title:p.title,cookies_file:S.cookie})});
+ try{const{job_id}=await api("/api/download",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mode:p.mode,media_type:S.media,resolution:S.res,video_format:S.vf||"mp4",audio_format:S.af||"mp3",audio_quality:S.aq||"0",formats:fids,expected_bytes:exp,urls,playlist_items:pi,total_items:ix.length,title:p.title,cookies_file:S.cookie})});
   S.job=job_id;try{localStorage.setItem("ytdl_job",job_id)}catch(_){}poll(job_id,"dl")}
  catch(e){fail(e.message,"choose")}};
 async function upCookie(f){if(!f)return;const fd=new FormData();fd.append("file",f);try{const j=await api("/api/cookies",{method:"POST",body:fd});S.cookie=j.cookies_file;toast("cookies loaded");chord([600,900]);sheet(null)}catch(e){toast(e.message)}}
@@ -351,13 +362,40 @@ async function refreshLib(){try{const f=(await api("/api/files")).files||[];$("#
  $$("#lib button").forEach(b=>b.onclick=async()=>{if(!confirm("Delete "+b.dataset.p+"?"))return;try{await fetch("/api/files",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({path:b.dataset.p})});refreshLib()}catch(e){toast(e.message)}})}catch(e){}}
 /* ===== data-usage estimates ===== */
 const fb=b=>!b?"—":b>=1073741824?(b/1073741824).toFixed(2)+" GB":b>=1048576?(b/1048576).toFixed(b>=1e8?0:1)+" MB":Math.max(1,b/1024|0)+" KB";
-function vSize(v,res){const s=v.sizes||{},hs=Object.keys(s).map(Number).sort((a,b)=>a-b);if(!hs.length)return null;const k=!res?hs[hs.length-1]:(hs.filter(x=>x<=res).pop()||hs[0]);return s[k]||null}
-function total(res,media){let sum=0,unk=0,est=false;for(const i of selIdx()){const v=S.probe.videos[i],z=media==="audio"?v.audio:vSize(v,res);if(z){sum+=z;if(v.est||media==="audio")est=true}else unk++}return{sum,unk,est}}
-function updateSizes(){if(!S.probe)return;const n=selIdx().length;
- $$("#chips .ch").forEach(c=>{const t=total(+c.dataset.r,"video");c.querySelector("small").textContent=t.sum?(t.est?"~":"")+fb(t.sum):"—"});
+const nn=c=>!c||c==="none";
+const szOf=(f,d)=>f.sz?f.sz:(f.tbr&&d?Math.round(f.tbr*125*d):0);
+/* best audio-only stream; for mp4 prefer AAC/m4a (plays everywhere), for webm prefer opus/webm, otherwise the highest bitrate */
+function bestAud(v,vf){const a=(v.fm||[]).filter(f=>nn(f.vc)&&!nn(f.ac));if(!a.length)return null;let pool=a;
+ if(vf==="mp4"){const m=a.filter(f=>f.ext==="m4a"||/^mp4a/.test(f.ac));if(m.length)pool=m}else if(vf==="webm"){const w=a.filter(f=>f.ext==="webm");if(w.length)pool=w}
+ return pool.slice().sort((x,y)=>(y.abr||y.tbr||0)-(x.abr||x.tbr||0))[0]}
+/* the exact video(+audio) streams that will be downloaded for a quality; sizes come from these same streams */
+function pickQ(v,res,vf){const vs=(v.fm||[]).filter(f=>f.h&&!nn(f.vc));if(!vs.length)return null;
+ const hs=[...new Set(vs.map(f=>f.h))].sort((a,b)=>a-b),h=!res?hs[hs.length-1]:(hs.filter(x=>x<=res).pop()||hs[0]);
+ const pe=f=>vf==="mp4"?(f.ext==="mp4"?2:f.ext==="webm"?0:1):vf==="webm"?(f.ext==="webm"?2:0):1,d=v.duration;
+ const c=vs.filter(f=>f.h===h).sort((x,y)=>(pe(y)-pe(x))||((y.fps||0)-(x.fps||0))||((szOf(y,d)||y.tbr||0)-(szOf(x,d)||x.tbr||0)));
+ const vid=c[0],aud=nn(vid.ac)?bestAud(v,vf):null,vs1=szOf(vid,d),as1=aud?szOf(aud,d):0;
+ return{h,fps:vid.fps||0,vid,aud,vs:vs1,as:as1,size:vs1?vs1+as1:0,ap:!!(vid.ap||(aud&&aud.ap))}}
+function fidOf(v){if(S.media==="audio"){const a=bestAud(v,"any");return a?a.id:""}const q=pickQ(v,S.res,S.vf||"mp4");return q?(q.aud?q.vid.id+"+"+q.aud.id:q.vid.id):""}
+function audSize(v){const d=v.duration,af=S.af||"mp3";
+ if(af==="best"){const a=bestAud(v,"any"),z=a?szOf(a,d):0;if(z)return{z,e:!a.sz}}
+ if(!d)return{z:0,e:true};if(af==="wav")return{z:Math.round(d*176400),e:true};if(af==="flac")return{z:Math.round(d*105840),e:true};
+ return{z:Math.round(d*(+S.aq||192)*125),e:true}}
+function vSizeOld(v,res){const s=v.sizes||{},hs=Object.keys(s).map(Number).sort((a,b)=>a-b);if(!hs.length)return null;const k=!res?hs[hs.length-1]:(hs.filter(x=>x<=res).pop()||hs[0]);return s[k]||null}
+function total(res,media){let sum=0,unk=0,est=false;for(const i of selIdx()){const v=S.probe.videos[i];let z=0,e=false;
+  if(media==="audio"){const a=audSize(v);z=a.z;e=a.e}else{const q=pickQ(v,res,S.vf||"mp4");if(q&&q.size){z=q.size;e=q.ap}else{z=vSizeOld(v,res)||0;e=true}}
+  if(z){sum+=z;if(e)est=true}else unk++}return{sum,unk,est}}
+function updateSizes(){if(!S.probe)return;const n=selIdx().length,vf=S.vf||"mp4",sel=selIdx();
+ $$("#chips .ch").forEach(c=>{const r=+c.dataset.r,t=total(r,"video");c.querySelector("small").textContent=t.sum?(t.est?"~":"")+fb(t.sum):"—";
+  if(!r){const f=sel.map(i=>pickQ(S.probe.videos[i],0,vf)).filter(Boolean)[0];c.querySelector("b").textContent=f?"Best · "+f.h+"p"+(f.fps>30?f.fps:""):"Best"}});
+ $$("#aqual .ch").forEach(c=>{const k=+c.dataset.aq;let sum=0;for(const i of sel){const d=S.probe.videos[i].duration;if(d)sum+=d*k*125}c.querySelector("small").textContent=sum?"~"+fb(sum):"—"});
  const tv=total(S.res,"video"),ta=total(0,"audio"),t=S.media==="audio"?ta:tv;
- $("#tV").textContent="MP4 · "+(tv.sum?(tv.est?"~":"")+fb(tv.sum):"size n/a");$("#tA").textContent="MP3 · "+(ta.sum?"~"+fb(ta.sum):"size n/a");
- $("#usage").innerHTML=n?`<b class="grad">${t.sum?(t.est?"≈ ":"")+fb(t.sum):"size unknown"}</b>of data<span> · ${n} ${n>1?"files":"file"} · ${S.media==="video"?(S.res?S.res+"p":"best quality"):(S.af==="best"?"original audio":(S.af||"mp3")+" best")}${t.unk?" · "+t.unk+" unknown":""}</span>`:"nothing selected";
+ $("#tV").textContent=(vf==="best"?"ORIGINAL":vf.toUpperCase())+" · "+(tv.sum?(tv.est?"~":"")+fb(tv.sum):"size n/a");
+ $("#tA").textContent=(S.af==="best"?"ORIGINAL":(S.af||"mp3").toUpperCase())+" · "+(ta.sum?(ta.est?"~":"")+fb(ta.sum):"size n/a");
+ let qi="";if(n){const v=S.probe.videos[sel[0]];
+  if(S.media==="audio"){const a=bestAud(v,"any");qi=a?`source audio: ${a.ext} ${Math.round(a.abr||a.tbr||0)} kbps${a.sz?" · "+fb(a.sz):""} → ${S.af==="best"?"kept as it is":(S.af||"mp3")+" "+(+S.aq||192)+" kbps"}`:""}
+  else{const q=pickQ(v,S.res,vf);if(q){const au=q.aud;qi=`${q.h}p${q.fps>30?q.fps:""} · ${(q.vid.vc||q.vid.ext||"").split(".")[0]} · video ${fb(q.vs)}${au?` + audio ${au.ext} ${Math.round(au.abr||au.tbr||0)} kbps ${fb(q.as)}`:" (audio included)"} = ${q.size?(q.ap?"≈ ":"")+fb(q.size):"size n/a"}`}}}
+ $("#qinfo").textContent=qi+(qi&&n>1?` · shown for the first of ${n}`:"");
+ $("#usage").innerHTML=n?`<b class="grad">${t.sum?(t.est?"≈ ":"")+fb(t.sum):"size unknown"}</b>of data<span> · ${n} ${n>1?"files":"file"} · ${S.media==="video"?(S.res?S.res+"p":"best quality"):(S.af==="best"?"original audio":(S.af||"mp3")+" "+(+S.aq||192)+"k")}${t.unk?" · "+t.unk+" unknown":""}</span>`:"nothing selected";
  $("#lsz").textContent=n&&t.sum?(t.est?"≈ ":"")+fb(t.sum)+" · "+(S.media==="video"?"video":"audio"):n?"size unknown":"pick something"}
 /* ===== ambient log: low-opacity background, fades away when the process ends ===== */
 const bg=$("#bglog");let bgLast="",bgOff=0;

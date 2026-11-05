@@ -35,6 +35,10 @@ class Job(val id: String, val kind: String) {
     @Volatile var error: String? = null
     @Volatile var cancel = false
     @Volatile var paused = false
+    @Volatile var bytes = 0L
+    @Volatile var overallPct = -1.0
+    @Volatile var lastYt = 0L
+    @Volatile var direct = false
     @Volatile var message = ""
     @Volatile var result: JSONObject? = null
     @Volatile var mode = ""
@@ -57,7 +61,7 @@ class Job(val id: String, val kind: String) {
         val o = JSONObject()
             .put("id", id).put("kind", kind).put("status", status).put("stage", stage)
             .put("progress", progress).put("current_pct", currentPct).put("speed", speed).put("eta", eta)
-            .put("current_file", currentFile).put("completed_items", completed).put("total_items", total)
+            .put("downloaded_bytes", bytes).put("overall_pct", overallPct).put("current_file", currentFile).put("completed_items", completed).put("total_items", total)
             .put("mode", mode).put("urls", urls).put("raw", raw).put("links", links)
             .put("log", log).put("message", message)
         error?.let { o.put("error", it) }
@@ -194,6 +198,12 @@ object Engine {
         return j.id
     }
 
+    private val infoCache = object : LinkedHashMap<String, String>(16, 0.75f, true) {
+        override fun removeEldestEntry(e: MutableMap.MutableEntry<String, String>?) = size > 24
+    }
+    private fun cachePut(u: String, raw: String) { synchronized(infoCache) { infoCache[u] = raw } }
+    private fun cacheGet(u: String): String? = synchronized(infoCache) { infoCache[u] }
+
     private fun dump(url: String, mode: String, cookie: String?): String {
         fun go(extra: List<String>): String {
             val r = YoutubeDLRequest(url)
@@ -232,6 +242,7 @@ object Engine {
             val c = Collected(); addMedia(c, items); j.addLog("Found ${items.size} file(s) by page scan.", "ok")
             finishMulti(j, c, null); return
         }
+        if (!playlist) cachePut(u, raw)
         j.raw.put(raw)
         j.addLog("Metadata received.", "ok")
         j.stage = "Ready"; j.progress = 100; j.status = "probe_done"
@@ -258,7 +269,7 @@ object Engine {
         val j = newJob("stream")
         val cookie = cookiePath(d.optString("cookies_file", ""))
         thread {
-            try { runStream(j, d.optString("url", ""), d.optInt("resolution", 0), d.optString("media_type", "video"), cookie) }
+            try { runStream(j, d.optString("url", ""), d.optInt("resolution", 0), d.optString("media_type", "video"), cookie, d.optString("video_id", ""), d.optString("audio_id", "")) }
             catch (e: Throwable) { j.fail(clean(e)) }
         }
         return j.id
@@ -270,7 +281,7 @@ object Engine {
 
     /** Finds a playable stream URL for the chosen quality (no download). HD YouTube-style formats come as
      *  separate video and audio URLs; the page plays them together and keeps them in sync. */
-    private fun runStream(j: Job, url: String, res: Int, media: String, cookie: String?) {
+    private fun runStream(j: Job, url: String, res: Int, media: String, cookie: String?, vidId: String = "", audId: String = "") {
         j.status = "fetching"; j.stage = "Preparing stream"; j.progress = 15
         if (url.isBlank()) { j.fail("Nothing to play."); return }
         if (url.startsWith("direct:")) {
@@ -280,7 +291,7 @@ object Engine {
         }
         if (!awaitReady(j)) return
         j.stage = "Finding the best stream"; j.progress = 40
-        var info = JSONObject(dump(url, "--no-playlist", cookie))
+        var info = JSONObject(cacheGet(url)?.takeIf { it.contains("\"formats\"") } ?: dump(url, "--no-playlist", cookie).also { cachePut(url, it) })
         if (info.has("entries")) info = info.getJSONArray("entries").optJSONObject(0) ?: throw Exception("No playable result.")
         val arr = info.optJSONArray("formats")
         val fm = (0 until (arr?.length() ?: 0)).mapNotNull { arr!!.optJSONObject(it) }.map { Fmt(it) }.filter { it.url.startsWith("http") }
@@ -295,7 +306,22 @@ object Engine {
         }
         fun byQ(l: List<Fmt>) = l.sortedWith(compareByDescending<Fmt> { it.h }.thenBy { it.vRank })
         var ok = false
-        if (media == "audio") {
+        // the exact streams the user picked in the quality list (instant, no guessing)
+        run {
+            val fa = if (audId.isNotEmpty()) fm.firstOrNull { it.o.optString("format_id") == audId } else null
+            if (media == "audio") {
+                if (fa != null) { single(fa, if (fa.proto.startsWith("m3u8")) "hls" else "audio"); ok = true }
+            } else if (vidId.isNotEmpty()) {
+                val fv = fm.firstOrNull { it.o.optString("format_id") == vidId }
+                if (fv != null) {
+                    single(fv, if (fv.proto.startsWith("m3u8")) "hls" else "video")
+                    if (!fv.hasA && fa != null) { out.put("audio_url", fa.url); out.put("note", "HD stream: video and audio load separately and are kept in sync.") }
+                    ok = true
+                }
+            }
+        }
+        if (ok) {
+        } else if (media == "audio") {
             val a = bestA ?: prog.filter { it.hasA }.minByOrNull { it.h } ?: hls.firstOrNull { it.hasA }
             if (a != null) { single(a, if (a.proto.startsWith("m3u8")) "hls" else "audio"); ok = true }
         } else {
@@ -410,7 +436,8 @@ object Engine {
                     j.addLog("Direct file link.", "ok")
                 } else {
                     try {
-                        c.add(u, dump(u, "--no-playlist", cookie)); j.addLog("Read ${i + 1}/${urls.size}", "ok")
+                        val raw1 = dump(u, "--no-playlist", cookie); cachePut(u, raw1)
+                        c.add(u, raw1); j.addLog("Read ${i + 1}/${urls.size}", "ok")
                     } catch (e: Exception) {
                         val items = pend[i]?.await() ?: emptyList()
                         if (items.isEmpty()) throw e
@@ -745,7 +772,7 @@ object Engine {
                     while (!futures.all { it.isDone }) {
                         if (j.cancel) { pool.shutdownNow(); throw Cancelled() }
                         var sum = 0L; for (i in 0 until parts) sum += doneArr.get(i)
-                        j.currentPct = sum * 100.0 / total
+                        j.currentPct = sum * 100.0 / total; j.lastYt = System.currentTimeMillis()
                         j.speed = if (j.paused) 0.0 else sum * 1000.0 / (System.currentTimeMillis() - t0 + 1)
                         Thread.sleep(300)
                     }
@@ -814,6 +841,7 @@ object Engine {
         if (t.isEmpty()) return
         val isProgress = t.startsWith("[download]") && t.contains("%")
         if (isProgress) {
+            j.lastYt = System.currentTimeMillis()
             j.currentPct = p.toDouble(); j.eta = eta; j.stage = "Downloading"
             RX_SPEED.find(t)?.let { j.speed = speedOf(it) }
             val now = System.currentTimeMillis()
@@ -843,6 +871,25 @@ object Engine {
         j.total = d.optInt("total_items", urls.size).coerceAtLeast(1)
         val cookie = cookiePath(d.optString("cookies_file", ""))
         val work = File(workRoot(), j.id).apply { mkdirs() }
+        val fl = d.optJSONArray("formats")
+        var curFid = ""
+        val expected = d.optLong("expected_bytes", 0L)
+        // live progress from the bytes on disk: works even when yt-dlp/aria2c print no percentage lines
+        thread {
+            var lastB = 0L; var lastT = System.currentTimeMillis(); var best = 0.0
+            while (j.status != "done" && j.status != "error" && j.status != "cancelled") {
+                try { Thread.sleep(500) } catch (_: InterruptedException) { return@thread }
+                val now = System.currentTimeMillis()
+                val b = work.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+                j.bytes = b
+                if (j.paused || j.direct) { j.overallPct = -1.0; lastB = b; lastT = now; continue }
+                if (j.stage.startsWith("Download")) {
+                    if (expected > 0) { best = maxOf(best, minOf(99.0, b * 100.0 / expected)); j.overallPct = best }
+                    if (now - j.lastYt > 2500 && b >= lastB) j.speed = (b - lastB) * 1000.0 / (now - lastT).coerceAtLeast(1)
+                }
+                lastB = b; lastT = now
+            }
+        }
         val h = if (res > 0) "[height<=$res]" else ""
         val af = d.optString("audio_format", "mp3").lowercase().let { if (it == "ogg") "vorbis" else it }
             .takeIf { it in setOf("mp3", "m4a", "opus", "vorbis", "wav", "flac", "aac", "best") } ?: "mp3"
@@ -860,7 +907,7 @@ object Engine {
         var ariaOn = ariaReady
         fun req(u: String, extra: List<String>, aria: Boolean = ariaOn): YoutubeDLRequest {
             val r = YoutubeDLRequest(u)
-            r.addOption("-f", fmt)
+            r.addOption("-f", if (curFid.isNotEmpty()) "$curFid/$fmt" else fmt)
             val tpl = if (u.startsWith("ytsearch")) {   // name Spotify tracks "Artist - Title"
                 val nm = u.substringAfter(":").removeSuffix(" audio").replace(Regex("[\\\\/:*?\"<>|\\u0000-\\u001f]+"), "_")
                     .trim(' ', '.').take(150).ifEmpty { "track" }.replace("%", "%%")
@@ -910,7 +957,12 @@ object Engine {
         for ((i, u) in urls.withIndex()) {
             if (j.cancel) throw Cancelled()
             if (!playlist) j.completed = i
-            if (u.startsWith("direct:")) { directDownload(j, u.removePrefix("direct:"), work); continue }
+            curFid = fl?.optString(i, "") ?: ""
+            if (u.startsWith("direct:")) {
+                j.direct = true
+                try { directDownload(j, u.removePrefix("direct:"), work) } finally { j.direct = false }
+                continue
+            }
             while (true) {
                 try { runYt(u); break }
                 catch (e: Exception) {
