@@ -4,7 +4,11 @@ import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import android.os.Build
+import android.os.Environment
+import android.media.MediaScannerConnection
 import android.provider.MediaStore
+import androidx.core.content.FileProvider
 import com.yausername.aria2c.Aria2c
 import com.yausername.ffmpeg.FFmpeg
 import com.yausername.youtubedl_android.YoutubeDL
@@ -1137,7 +1141,26 @@ object Engine {
         }
     }
 
-    private fun publish(f: File, onBytes: (Long) -> Unit = {}): String {
+    private fun publish(f: File, onBytes: (Long) -> Unit = {}): String =
+        if (Build.VERSION.SDK_INT >= 29) publishMediaStore(f, onBytes) else publishLegacy(f, onBytes)
+
+    /** Android 7-9: write straight into Downloads/5D-Downloader (needs the storage permission; if it was refused, use the app's own folder). */
+    @Suppress("DEPRECATION")
+    private fun publishLegacy(f: File, onBytes: (Long) -> Unit): String {
+        var dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "5D-Downloader")
+        if (!((dir.isDirectory || dir.mkdirs()) && dir.canWrite()))
+            dir = File(ctx.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: ctx.filesDir, "5D-Downloader").also { it.mkdirs() }
+        val stem = f.name.substringBeforeLast('.', f.name); val ext = f.name.substringAfterLast('.', "")
+        var dest = File(dir, f.name); var k = 1
+        while (dest.exists()) dest = File(dir, "$stem ($k)" + if (ext.isNotEmpty()) ".$ext" else "").also { k++ }
+        try {
+            java.io.FileOutputStream(dest).use { os -> fastCopy(f, os, onBytes) }
+        } catch (e: Exception) { dest.delete(); throw e }     // never leave a half-written file behind
+        try { MediaScannerConnection.scanFile(ctx, arrayOf(dest.path), null, null) } catch (_: Exception) {}
+        return FileProvider.getUriForFile(ctx, ctx.packageName + ".files", dest).toString()
+    }
+
+    private fun publishMediaStore(f: File, onBytes: (Long) -> Unit): String {
         val cr = ctx.contentResolver
         val cv = ContentValues().apply {
             put(MediaStore.Downloads.DISPLAY_NAME, f.name)

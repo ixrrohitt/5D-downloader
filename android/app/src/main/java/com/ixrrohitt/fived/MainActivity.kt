@@ -54,6 +54,9 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         Engine.init(this)
         if (Build.VERSION.SDK_INT >= 33) requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+        // Android 7-9 need this to save into the public Downloads folder (without it files go to the app's own folder)
+        if (Build.VERSION.SDK_INT in 23..28 && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != android.content.pm.PackageManager.PERMISSION_GRANTED)
+            requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 2)
 
         val loader = WebViewAssetLoader.Builder().setDomain("appassets.androidplatform.net")
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
@@ -174,7 +177,7 @@ class MainActivity : Activity() {
 
         @JavascriptInterface fun localVersion(): String = Ota.local(this@MainActivity).toString()
         @JavascriptInterface fun apkVersion(): String =
-            packageManager.getPackageInfo(packageName, 0).let { if (Build.VERSION.SDK_INT >= 28) it.longVersionCode.toString() else "1" }
+            packageManager.getPackageInfo(packageName, 0).let { if (Build.VERSION.SDK_INT >= 28) it.longVersionCode.toString() else @Suppress("DEPRECATION") it.versionCode.toString() }
         @JavascriptInterface fun writeOta(name: String, text: String) = Ota.write(this@MainActivity, name, text)
         @JavascriptInterface fun commitOta(version: String) = Ota.commit(this@MainActivity, version.toInt())
         @JavascriptInterface fun resetOta() = Ota.reset(this@MainActivity)

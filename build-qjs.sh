@@ -16,19 +16,22 @@ echo "SDK: $SDK"; echo "NDK: $NDK"
 SRC=".qjs-src"
 [ -d "$SRC" ] || git clone --depth 1 https://github.com/quickjs-ng/quickjs.git "$SRC"
 
-for abi in arm64-v8a armeabi-v7a; do
+for abi in arm64-v8a armeabi-v7a x86_64 x86; do
   echo "=== $abi ==="
-  B=".qjs-build/$abi"
-  if cmake -S "$SRC" -B "$B" \
-        -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
-        -DANDROID_ABI="$abi" -DANDROID_PLATFORM=android-29 \
-        -DCMAKE_BUILD_TYPE=Release -DQJS_BUILD_EXAMPLES=OFF -DQJS_ENABLE_INSTALL=OFF \
-     && cmake --build "$B" --target qjs_exe -j"$(nproc)"; then
-    mkdir -p "android/app/src/main/jniLibs/$abi"
-    cp "$B/qjs" "android/app/src/main/jniLibs/$abi/libqjs.so"
-    echo "OK -> android/app/src/main/jniLibs/$abi/libqjs.so"
-  else
-    echo "WARNING: $abi build failed (arm64-v8a is the one that matters for modern phones)"
-  fi
+  ok=0
+  # lowest Android platform that compiles = the binary then also runs on the oldest phones
+  for plat in 24 26 28 29; do
+    B=".qjs-build/$abi"; rm -rf "$B"
+    if cmake -S "$SRC" -B "$B" \
+          -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
+          -DANDROID_ABI="$abi" -DANDROID_PLATFORM="android-$plat" \
+          -DCMAKE_BUILD_TYPE=Release -DQJS_BUILD_EXAMPLES=OFF -DQJS_ENABLE_INSTALL=OFF >/dev/null \
+       && cmake --build "$B" --target qjs_exe -j"$(nproc)" >/dev/null; then
+      mkdir -p "android/app/src/main/jniLibs/$abi"
+      cp "$B/qjs" "android/app/src/main/jniLibs/$abi/libqjs.so"
+      echo "OK -> $abi (android-$plat)"; ok=1; break
+    fi
+  done
+  [ "$ok" = 1 ] || echo "WARNING: $abi build failed"
 done
 ls -la android/app/src/main/jniLibs/*/libqjs.so

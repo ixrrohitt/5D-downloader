@@ -1,8 +1,8 @@
 {
-  "version": 7,
-  "apk_version": 7,
+  "version": 8,
+  "apk_version": 8,
   "files": [
     "index.html"
   ],
-  "notes": "Fast save: big-chunk copy, parallel and pipelined saving to Downloads."
+  "notes": "Universal build: Android 7+ and every CPU type."
 }

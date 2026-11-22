@@ -2,7 +2,7 @@
 
 YouTube (and many other sites) downloader with a 3D/4D/5D animated UI. Two ways to use it:
 
-* **Phone app (Android 10+)**: yt-dlp, ffmpeg and aria2c run *on the phone*, no server needed.
+* **Phone app (Android 7.0+, any CPU)**: yt-dlp, ffmpeg and aria2c run *on the phone*, no server needed.
   Share a link to the app, pick quality (real sizes shown), saved in `Downloads/5D-Downloader`.
 * **PC version**: `pip install -r requirements.txt && python webapp.py`, open `http://localhost:8000`
   (same UI, `www/index.html`). Works in GitHub Codespaces too.
@@ -23,9 +23,19 @@ YouTube (and many other sites) downloader with a 3D/4D/5D animated UI. Two ways 
 | **Spotify** | Track / album / playlist links: the track list is read from Spotify and each song is found and downloaded as audio from YouTube (Spotify audio itself is DRM-protected). |
 | **Layout** | Buttons never overlap: screens scroll when there is a lot to show, and the hover "magnet" effect is tiny and mouse-only. |
 
+## Which APK?
+| File | For | Size |
+|---|---|---|
+| `5D-Downloader.apk` | **Universal.** Android 7.0+ and every CPU type (arm64, armv7, x86, x86_64). Use this if unsure. | ~150 MB |
+| `5D-Downloader-arm64.apk` | Smaller build for most phones made since ~2017 (64-bit ARM). | ~50 MB |
+
+* **Android 10+**: files are saved with MediaStore (no permission asked).
+* **Android 7–9**: the app asks for storage permission once and saves to `Downloads/5D-Downloader`; if you refuse, files go to the app's own folder (`Android/data/com.ixrrohitt.fived/files/Download`).
+* The UI runs in the system WebView; on Android 7–9 keep **Android System WebView / Chrome** updated from the Play Store.
+
 ## Install the phone app
 1. Push this repo to GitHub (`main`). The **Actions** tab builds the APK (~5 min).
-2. Open **Releases → 5D Downloader (latest)** on your phone, download `5D-Downloader.apk`, install
+2. Open **Releases → 5D Downloader (latest)** on your phone, download **`5D-Downloader.apk`** (universal: works on every phone), install
    (allow "install unknown apps" for your browser once).
 3. In YouTube: **Share → 5D Downloader**.
 
@@ -33,7 +43,7 @@ YouTube (and many other sites) downloader with a 3D/4D/5D animated UI. Two ways 
 The released APK is signed and valid, so this is almost always one of these:
 1. **Incomplete download.** The APK is ~75 MB; the release page shows its exact size in bytes (and a `.sha256` file). Re-download on a stable connection and compare the size.
 2. **An older copy signed with a different key** (e.g. built locally in Android Studio). Uninstall the old 5D Downloader once, then install. Saved files in `Downloads/5D-Downloader` are not deleted.
-3. **Android 9 or older.** The app needs Android 10+ (API 29).
+3. **Android 6 or older.** The app needs Android 7.0+ (API 24).
 4. **Installer quirks on some custom ROMs / GSIs.** Builds are now signed with v1+v2+v3; also try opening the APK from a file manager instead of the browser download notification.
 5. Open the APK from **Downloads**, not from inside a zip or a "preview".
 

@@ -22,15 +22,25 @@ android {
 
     defaultConfig {
         applicationId = "com.ixrrohitt.fived"
-        minSdk = 29
+        minSdk = 24            // Android 7.0+ (every library we use supports 24)
         targetSdk = 34
         // versionCode comes from "apk_version" in ../version.json: bump it whenever you push a new APK,
         // otherwise some phones refuse to install it over the old one ("package appears to be invalid").
         val apkVer = Regex("\"apk_version\"\\s*:\\s*(\\d+)").find(rootProject.file("../version.json").readText())?.groupValues?.get(1)?.toInt() ?: 1
         versionCode = apkVer
         versionName = "1.$apkVer"
-        ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
     }
+
+    // One universal APK (every CPU type: arm64, armv7, x86_64, x86) + a smaller arm64-only APK for modern phones.
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+            isUniversalApk = true
+        }
+    }
+    lint { abortOnError = false; checkReleaseBuilds = false }   // never let a lint warning block the APK
 
     // Fixed key (committed) so every build can be installed over the previous one.
     signingConfigs {

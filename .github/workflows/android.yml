@@ -21,23 +21,59 @@ jobs:
           SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKM" --licenses > /dev/null || true
           "$SDKM" "platforms;android-34" "build-tools;34.0.0"
+      # QuickJS (lets yt-dlp solve YouTube's JS challenge) for EVERY CPU type, built for the oldest Android that compiles.
+      # Never fails the build: the committed arm binaries stay as a fallback.
+      - name: Build QuickJS for all ABIs
+        continue-on-error: true
+        run: |
+          NDK="${ANDROID_NDK_LATEST_HOME:-${ANDROID_NDK_HOME:-}}"
+          if [ -z "$NDK" ] || [ ! -d "$NDK" ]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;27.2.12479018" > /dev/null
+            NDK="$ANDROID_HOME/ndk/27.2.12479018"
+          fi
+          git clone --depth 1 https://github.com/quickjs-ng/quickjs.git /tmp/qjs-src
+          for abi in arm64-v8a armeabi-v7a x86_64 x86; do
+            ok=0
+            for plat in 24 26 28 29; do
+              rm -rf "/tmp/qjs-build/$abi"
+              if cmake -S /tmp/qjs-src -B "/tmp/qjs-build/$abi" -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
+                   -DANDROID_ABI="$abi" -DANDROID_PLATFORM="android-$plat" -DCMAKE_BUILD_TYPE=Release \
+                   -DQJS_BUILD_EXAMPLES=OFF -DQJS_ENABLE_INSTALL=OFF > /dev/null \
+                 && cmake --build "/tmp/qjs-build/$abi" --target qjs_exe -j"$(nproc)" > /dev/null; then
+                mkdir -p "android/app/src/main/jniLibs/$abi"
+                cp "/tmp/qjs-build/$abi/qjs" "android/app/src/main/jniLibs/$abi/libqjs.so"
+                echo "qjs OK: $abi (android-$plat)"; ok=1; break
+              fi
+            done
+            [ "$ok" = 1 ] || echo "::warning::QuickJS build failed for $abi"
+          done
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: "8.9" }
-      - name: Build APK
+      - name: Build APKs
         working-directory: android
         run: gradle --no-daemon assembleRelease
-      - name: Collect APK
-        run: cp android/app/build/outputs/apk/release/app-release.apk 5D-Downloader.apk
-      - name: Verify APK + checksum
+      - name: Collect APKs
+        run: |
+          OUT=android/app/build/outputs/apk/release
+          ls -la "$OUT"
+          U="$(ls "$OUT"/*universal*.apk | head -1)"
+          cp "$U" 5D-Downloader.apk                       # universal: works on every phone (Android 7+, any CPU)
+          A="$(ls "$OUT"/*arm64-v8a*.apk 2>/dev/null | head -1 || true)"
+          [ -n "$A" ] && cp "$A" 5D-Downloader-arm64.apk   # smaller: most phones made since ~2017
+          ls -la *.apk
+      - name: Verify APKs + checksums
         id: apk
         run: |
           sudo apt-get install -y -q apksigner > /dev/null 2>&1 || true
-          unzip -tq 5D-Downloader.apk
-          apksigner verify --verbose 5D-Downloader.apk || true
-          sha256sum 5D-Downloader.apk | tee 5D-Downloader.apk.sha256
+          for f in *.apk; do
+            unzip -tq "$f"
+            apksigner verify --verbose "$f" || true
+            sha256sum "$f" | tee -a SHA256SUMS.txt
+          done
           echo "size=$(stat -c%s 5D-Downloader.apk)" >> "$GITHUB_OUTPUT"
+          if [ -f 5D-Downloader-arm64.apk ]; then echo "size_arm64=$(stat -c%s 5D-Downloader-arm64.apk)" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/upload-artifact@v4
-        with: { name: 5D-Downloader-apk, path: 5D-Downloader.apk }
+        with: { name: 5D-Downloader-apk, path: "*.apk" }
       - name: Publish release (always the same "latest" link)
         uses: softprops/action-gh-release@v2
         with:
@@ -45,9 +81,11 @@ jobs:
           name: 5D Downloader (latest)
           files: |
             5D-Downloader.apk
-            5D-Downloader.apk.sha256
+            5D-Downloader-arm64.apk
+            SHA256SUMS.txt
           body: |
-            APK size: ${{ steps.apk.outputs.size }} bytes (check this after downloading).
-            If Android says "package appears to be invalid", the download is incomplete or you have an older copy
-            signed with a different key: re-download, or uninstall the old app first (saved files stay in Downloads).
+            **5D-Downloader.apk** = universal: Android 7.0+ and every CPU type (arm64, armv7, x86, x86_64). Size: ${{ steps.apk.outputs.size }} bytes.
+            **5D-Downloader-arm64.apk** = smaller, for most phones made since ~2017. Size: ${{ steps.apk.outputs.size_arm64 }} bytes.
+            Compare the size after downloading. If Android says "package appears to be invalid", the download is incomplete,
+            or an older copy signed with a different key is installed: re-download / uninstall the old app first (saved files stay in Downloads).
           make_latest: true
