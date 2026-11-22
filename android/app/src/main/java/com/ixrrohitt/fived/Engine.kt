@@ -3,6 +3,7 @@ package com.ixrrohitt.fived
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
 import com.yausername.aria2c.Aria2c
 import com.yausername.ffmpeg.FFmpeg
@@ -40,6 +41,8 @@ class Job(val id: String, val kind: String) {
     @Volatile var overallPct = -1.0
     @Volatile var lastYt = 0L
     @Volatile var direct = false
+    @Volatile var savedBytes = 0L                 // bytes already moved to Downloads (their work files are deleted) - keeps the live % from dipping
+    @Volatile var onItem: (() -> Unit)? = null    // called when yt-dlp starts the next playlist item
     @Volatile var message = ""
     @Volatile var result: JSONObject? = null
     @Volatile var mode = ""
@@ -928,7 +931,7 @@ object Engine {
             t.startsWith("[ExtractAudio]") -> { j.stage = "Running FFmpegExtractAudio"; j.currentPct = 0.0 }
             t.startsWith("[download] Destination:") -> { j.currentFile = File(t.substringAfter("Destination:").trim()).name; j.stage = "Downloading" }
         }
-        RX_ITEM.find(t)?.let { j.completed = (it.groupValues[1].toInt() - 1).coerceAtLeast(0) }
+        RX_ITEM.find(t)?.let { j.completed = (it.groupValues[1].toInt() - 1).coerceAtLeast(0); try { j.onItem?.invoke() } catch (_: Exception) {} }
         j.addLog(t.take(300), if (t.startsWith("ERROR")) "error" else if (t.startsWith("WARNING")) "warn" else "info")
     }
 
@@ -951,7 +954,7 @@ object Engine {
             while (j.status != "done" && j.status != "error" && j.status != "cancelled") {
                 try { Thread.sleep(500) } catch (_: InterruptedException) { return@thread }
                 val now = System.currentTimeMillis()
-                val b = work.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+                val b = work.walkTopDown().filter { it.isFile }.sumOf { it.length() } + j.savedBytes
                 j.bytes = b
                 if (j.paused || j.direct) { j.overallPct = -1.0; lastB = b; lastT = now; continue }
                 if (j.stage.startsWith("Download")) {
@@ -1025,6 +1028,35 @@ object Engine {
             }
         }
 
+        // ---- fast save (the app's version of fastdl: big chunks, several files at once, start saving while the rest still downloads)
+        val saved = java.util.Collections.synchronizedList(mutableListOf<SavedFile>())
+        val queued = ConcurrentHashMap.newKeySet<String>()
+        val futures = java.util.Collections.synchronizedList(mutableListOf<java.util.concurrent.Future<*>>())
+        fun saveFile(f: File, meter: CopyMeter?) {
+            val size = f.length()
+            val uri = publish(f) { n -> if (j.cancel) throw Cancelled(); meter?.add(n, f.name) }
+            if (f.delete()) synchronized(j) { j.savedBytes += size }
+            val mb = Math.round(size / 1048576.0 * 10) / 10.0
+            addSaved(f.name, uri, mb)
+            saved.add(SavedFile(f.name, uri, mb))
+        }
+        // strict = while yt-dlp is still running (only files that are surely finished); otherwise everything that is not a partial download
+        fun flush(strict: Boolean, meter: CopyMeter?) {
+            val now = System.currentTimeMillis()
+            for (f in work.walkTopDown().filter { it.isFile }.sortedBy { it.name }) {
+                val n = f.name
+                if (n.endsWith(".part") || n.endsWith(".ytdl") || n.endsWith(".aria2")) continue
+                if (strict && (n.endsWith(".tmp") || n.contains(".temp.") || INTERMEDIATE.containsMatchIn(n) || now - f.lastModified() < 4000)) continue
+                if (!queued.add(f.path)) continue
+                futures.add(SAVE_POOL.submit(Runnable {
+                    try { saveFile(f, meter) }
+                    catch (e: Cancelled) { }
+                    catch (e: Exception) { queued.remove(f.path); j.addLog("Could not save ${f.name} yet (${e.message}); will retry.", "warn") }
+                }))
+            }
+        }
+        if (playlist) j.onItem = { flush(true, null) }   // item N is finished the moment item N+1 starts
+
         for ((i, u) in urls.withIndex()) {
             if (j.cancel) throw Cancelled()
             if (!playlist) j.completed = i
@@ -1032,6 +1064,7 @@ object Engine {
             if (u.startsWith("direct:")) {
                 j.direct = true
                 try { directDownload(j, u.removePrefix("direct:"), work) } finally { j.direct = false }
+                flush(false, null)
                 continue
             }
             while (true) {
@@ -1042,23 +1075,25 @@ object Engine {
                     throw e
                 }
             }
+            if (!playlist && i < urls.size - 1) flush(false, null)   // this link is finished: save it while the next one downloads
         }
+        j.onItem = null
         if (j.cancel) throw Cancelled()
 
         j.stage = "Saving to Downloads"; j.currentPct = 100.0
-        val files = work.walkTopDown().filter { it.isFile && !it.name.endsWith(".part") && !it.name.endsWith(".ytdl") }.sortedBy { it.name }.toList()
-        if (files.isEmpty()) { j.fail("No file was produced — open the log (≡) for details."); work.deleteRecursively(); return }
+        val rest = { work.walkTopDown().filter { it.isFile && !it.name.endsWith(".part") && !it.name.endsWith(".ytdl") && !it.name.endsWith(".aria2") }.sortedBy { it.name }.toList() }
+        val meter = CopyMeter(j, rest().filter { it.path !in queued }.sumOf { it.length() })
+        flush(false, meter)
+        for (fu in futures.toList()) { try { fu.get() } catch (_: Exception) {} }
+        if (j.cancel) throw Cancelled()
+        for (f in rest()) saveFile(f, meter)          // whatever a background save could not finish: foreground retry (errors surface as before)
+        if (saved.isEmpty()) { j.fail("No file was produced — open the log (≡) for details."); work.deleteRecursively(); return }
         val links = JSONArray()
-        for (f in files) {
-            val uri = publish(f)
-            val mb = Math.round(f.length() / 1048576.0 * 10) / 10.0
-            addSaved(f.name, uri, mb)
-            links.put(JSONObject().put("name", f.name).put("size_mb", mb).put("url", "#").put("uri", uri).put("is_zip", false))
-        }
+        for (sf in saved.sortedBy { it.name }) links.put(JSONObject().put("name", sf.name).put("size_mb", sf.mb).put("url", "#").put("uri", sf.uri).put("is_zip", false))
         work.deleteRecursively()
         j.links = links; j.completed = j.total; j.currentPct = 100.0
         j.stage = "Complete"; j.status = "done"; j.addLog("Saved to Downloads/5D-Downloader.", "ok")
-        KeepAliveService.done(ctx, "Saved ${files.size} file(s) to Downloads/5D-Downloader")
+        KeepAliveService.done(ctx, "Saved ${saved.size} file(s) to Downloads/5D-Downloader")
     }
 
     // ------------------------------------------------------- Downloads folder
@@ -1067,7 +1102,42 @@ object Engine {
         "mkv" -> "video/x-matroska"; "opus", "ogg" -> "audio/ogg"; "wav" -> "audio/wav"; else -> "application/octet-stream"
     }
 
-    private fun publish(f: File): String {
+    private class SavedFile(val name: String, val uri: String, val mb: Double)
+
+    /** Speed / ETA of the final "Saving to Downloads" step, shared by the files that are copied at the same time. */
+    private class CopyMeter(val j: Job, val total: Long) {
+        private val done = java.util.concurrent.atomic.AtomicLong(); private val t0 = System.currentTimeMillis()
+        fun add(n: Long, name: String) {
+            val d = done.addAndGet(n); val sec = ((System.currentTimeMillis() - t0) / 1000.0).coerceAtLeast(0.3)
+            j.speed = d / sec; j.eta = if (j.speed > 0 && total > d) ((total - d) / j.speed).toLong() else 0; j.currentFile = name
+        }
+    }
+
+    // like fastdl.py's SEND_MAX: move the file in big pieces, never in tiny 64 KB writes (every small write is a round trip through Android's storage layer)
+    private const val COPY_CHUNK = 8L shl 20
+    private val INTERMEDIATE = Regex("""\.f[\w-]+\.[A-Za-z0-9]+$""")      // title.f137.mp4 = an unmerged video/audio piece
+    private val SAVE_POOL = java.util.concurrent.Executors.newFixedThreadPool(3)   // up to 3 files saved at once
+
+    private fun fastCopy(src: File, os: java.io.FileOutputStream, onBytes: (Long) -> Unit) {
+        java.io.FileInputStream(src).use { ins ->
+            val inCh = ins.channel; val outCh = os.channel
+            val size = inCh.size(); var pos = 0L
+            try {                                       // kernel-assisted copy (sendfile / mapped) in 8 MB pieces
+                while (pos < size) {
+                    val n = inCh.transferTo(pos, minOf(COPY_CHUNK, size - pos), outCh)
+                    if (n <= 0L) break
+                    pos += n; onBytes(n)
+                }
+            } catch (e: java.io.IOException) { /* this storage cannot do it: finish with the buffered loop below */ }
+            if (pos < size) {
+                inCh.position(pos); outCh.position(pos)
+                val buf = ByteArray(4 shl 20)
+                while (true) { val n = ins.read(buf); if (n <= 0) break; os.write(buf, 0, n); onBytes(n.toLong()) }
+            }
+        }
+    }
+
+    private fun publish(f: File, onBytes: (Long) -> Unit = {}): String {
         val cr = ctx.contentResolver
         val cv = ContentValues().apply {
             put(MediaStore.Downloads.DISPLAY_NAME, f.name)
@@ -1076,7 +1146,13 @@ object Engine {
             put(MediaStore.Downloads.IS_PENDING, 1)
         }
         val uri = cr.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cv) ?: throw Exception("Could not create a file in Downloads")
-        cr.openOutputStream(uri)!!.use { o -> f.inputStream().use { it.copyTo(o, 1 shl 16) } }
+        try {
+            val pfd = cr.openFileDescriptor(uri, "w") ?: throw Exception("Could not open the file in Downloads")
+            ParcelFileDescriptor.AutoCloseOutputStream(pfd).use { os -> fastCopy(f, os, onBytes) }
+        } catch (e: Exception) {
+            try { cr.delete(uri, null, null) } catch (_: Exception) {}     // never leave a half-written file behind
+            throw e
+        }
         cv.clear(); cv.put(MediaStore.Downloads.IS_PENDING, 0); cr.update(uri, cv, null, null)
         return uri.toString()
     }

@@ -1,8 +1,8 @@
 {
-  "version": 5,
-  "apk_version": 5,
+  "version": 6,
+  "apk_version": 6,
   "files": [
     "index.html"
   ],
-  "notes": "Stream fallbacks and playback diagnostics."
+  "notes": "Fast save: big-chunk copy, parallel and pipelined saving to Downloads."
 }

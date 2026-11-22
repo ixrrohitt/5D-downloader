@@ -16,6 +16,7 @@ YouTube (and many other sites) downloader with a 3D/4D/5D animated UI. Two ways 
 | **Audio** | `mp3 / m4a / opus / ogg / flac / wav / original`, plus bitrate chips (never above the source bitrate), each with its size. |
 | **Live progress** | One overall percentage across video + audio + merge, with `downloaded / total`, speed and ETA. Never goes backwards. Preparing / merging / saving are shown as their own stages. |
 | **Fast start** | The video is read only once. Download and Watch reuse that data (cached 20 min), so they start in about a second instead of reading the video again. |
+| **Fast save** | The last step (work folder → `Downloads/5D-Downloader`) used to copy in tiny 64 KB writes, one file after another. Now files are moved in 8 MB pieces (kernel-assisted when the phone allows it), up to 3 files at once, and finished files are saved **while the rest of a playlist / link list is still downloading**. Failed background saves are retried at the end; a half-written file is never left behind. |
 | **Watch without downloading** | Android only. Streams the chosen quality in the built-in player. |
 | **Many links / playlists** | Paste several links (up to 20) or a playlist. Each video is read in parallel; for playlists the sizes start as estimates and are replaced by exact sizes in the background (first 30 selected videos). |
 | **Multi-connection downloads** | Android uses aria2c (16 connections). Pause / resume / cancel, keeps running in the background (notification). |
