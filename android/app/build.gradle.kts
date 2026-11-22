@@ -39,6 +39,11 @@ android {
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
+            // sign with ALL schemes: Android 10+ only needs v2, but some custom ROMs / GSIs / third-party installers
+            // still report "package appears to be invalid" for APKs that carry only the v2 block
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
     buildTypes {

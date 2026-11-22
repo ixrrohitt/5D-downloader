@@ -28,6 +28,14 @@ jobs:
         run: gradle --no-daemon assembleRelease
       - name: Collect APK
         run: cp android/app/build/outputs/apk/release/app-release.apk 5D-Downloader.apk
+      - name: Verify APK + checksum
+        id: apk
+        run: |
+          sudo apt-get install -y -q apksigner > /dev/null 2>&1 || true
+          unzip -tq 5D-Downloader.apk
+          apksigner verify --verbose 5D-Downloader.apk || true
+          sha256sum 5D-Downloader.apk | tee 5D-Downloader.apk.sha256
+          echo "size=$(stat -c%s 5D-Downloader.apk)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with: { name: 5D-Downloader-apk, path: 5D-Downloader.apk }
       - name: Publish release (always the same "latest" link)
@@ -35,5 +43,11 @@ jobs:
         with:
           tag_name: latest
           name: 5D Downloader (latest)
-          files: 5D-Downloader.apk
+          files: |
+            5D-Downloader.apk
+            5D-Downloader.apk.sha256
+          body: |
+            APK size: ${{ steps.apk.outputs.size }} bytes (check this after downloading).
+            If Android says "package appears to be invalid", the download is incomplete or you have an older copy
+            signed with a different key: re-download, or uninstall the old app first (saved files stay in Downloads).
           make_latest: true

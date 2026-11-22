@@ -29,6 +29,14 @@ YouTube (and many other sites) downloader with a 3D/4D/5D animated UI. Two ways 
    (allow "install unknown apps" for your browser once).
 3. In YouTube: **Share → 5D Downloader**.
 
+### "App not installed / package appears to be invalid"
+The released APK is signed and valid, so this is almost always one of these:
+1. **Incomplete download.** The APK is ~75 MB; the release page shows its exact size in bytes (and a `.sha256` file). Re-download on a stable connection and compare the size.
+2. **An older copy signed with a different key** (e.g. built locally in Android Studio). Uninstall the old 5D Downloader once, then install. Saved files in `Downloads/5D-Downloader` are not deleted.
+3. **Android 9 or older.** The app needs Android 10+ (API 29).
+4. **Installer quirks on some custom ROMs / GSIs.** Builds are now signed with v1+v2+v3; also try opening the APK from a file manager instead of the browser download notification.
+5. Open the APK from **Downloads**, not from inside a zip or a "preview".
+
 ## Updating (no reinstall needed for UI changes)
 | What you changed | What to do | In the app |
 |---|---|---|
